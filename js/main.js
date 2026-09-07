@@ -114,6 +114,7 @@ function initInner() {
   /* ค่าเริ่มต้น = ฉาก 2D (โหมด 3D ถอดออกตามที่ผู้เล่นเลือก) */
   requestAnimationFrame(gameLoop);
   setSpeed(0);
+  syncBottomNav();
   showSplash();
 }
 
@@ -203,7 +204,7 @@ function showSplash(pane) {
   const navItems = [['home', '🏠 หน้าแรก'], ['manual', '📖 วิธีเล่น'], ['depts', '🏭 18 แผนก'], ['scoring', '🏅 การวัดผล'], ['ranking', '🏆 จัดอันดับ'], ['sound', '⚙️ ตั้งค่า']];
   const cur = navItems.some(([v]) => v === UI.spPane) ? UI.spPane : 'home';
   const nav = navItems.map(([v, t]) =>
-    `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${L(t)}</button>`).join('');
+    `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${TR(t)}</button>`).join('');
   sp.innerHTML = `
     <div class="sp-bg"></div>
     <div class="sp-fx" aria-hidden="true">
@@ -271,11 +272,11 @@ function splashPane(pane, saved, name) {
     <div class="sp-scroll">
       <p>โรงงานมี <b>18 แผนก</b> ที่ต้องบริหารและอัปเกรดเป็นดาว — สายวัตถุดิบต้องสมดุลกัน เครื่องจักรมีค่าพลังที่ลดลงเรื่อย ๆ ทีมสนับสนุนช่วยลดความเสี่ยงและเพิ่มรายได้</p>
       ${Object.keys(DEPT_GROUPS).map(g => `
-        <h3>${L(DEPT_GROUPS[g].name)}</h3>
+        <h3>${TR(DEPT_GROUPS[g].name)}</h3>
         <p class="sp-note" style="margin:2px 0 6px">${DEPT_GROUPS[g].tip}</p>
         ${DEPTS.filter(d => d.group === g).map(d => `
           <div class="sp-deptrow"><span class="sp-dept-ic">${d.icon}</span>
-            <div><b>${d.no ? d.no + '. ' : ''}${L(d.name)}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> เต็ม ${d.maxStar} ดาว</small></span>
+            <div><b>${d.no ? d.no + '. ' : ''}${TR(d.name)}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> เต็ม ${d.maxStar} ดาว</small></span>
               <div>${d.role}</div></div></div>`).join('')}`).join('')}
     </div>
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เข้าใจแล้ว</button></div>`;
@@ -285,7 +286,7 @@ function splashPane(pane, saved, name) {
     <div class="sp-scroll">
       <p>ตอนจบฤดู (130 วัน) เกมให้เกรด <b>S–F</b> จาก <b>คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000 แต้ม</b> (สำหรับระบบ Ranking แข่งขัน) — เรียงตามความสำคัญ:</p>
       ${SCORE_SPEC.map((s, i) => `<div class="sp-deptrow"><span class="sp-dept-ic">${s.icon}</span>
-        <div><b>${i + 1}. ${L(s.name)}</b> <small style="color:var(--gold-2)">น้ำหนัก ${s.w} แต้ม</small>${s.lower ? ' <small>(ยิ่งน้อยยิ่งดี)</small>' : ''}<div>${s.tip}</div></div></div>`).join('')}
+        <div><b>${i + 1}. ${TR(s.name)}</b> <small style="color:var(--gold-2)">น้ำหนัก ${s.w} แต้ม</small>${s.lower ? ' <small>(ยิ่งน้อยยิ่งดี)</small>' : ''}<div>${s.tip}</div></div></div>`).join('')}
       <h3>เกณฑ์เกรด (คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000)</h3>
       <div class="sp-grades">
         ${[['S', '945+', '#ffe08a'], ['A+', '890–944', '#a8f0b0'], ['A', '810–889', '#7be08a'], ['B+', '750–809', '#9ad0ff'], ['B', '670–749', '#5cb3ff'], ['C+', '610–669', '#ffd07a'], ['C', '540–609', '#ffb547'], ['F', '< 540', '#ff6b6b']]
@@ -369,7 +370,7 @@ function showPrepBrief() {
   showModal(`<h2>🗓️ ก่อนเปิดหีบ</h2>
     <p class="tip">วันหีบยังไม่เดิน คุณมีเวลาเตรียมตัวเต็มที่ — ลงทุนแผนกที่ต้องการ ตั้งค่ากระบวนการ แล้วค่อยกด <b>เริ่มหีบ</b></p>
     <div class="card"><h3>กำลังของสายวัตถุดิบตอนนี้</h3>
-      ${chain.map(c => `<div class="kv"><span class="k">${L(c.name)}</span><span class="v">${fmt(Math.round(c.tpd))} ${L('ตัน/วัน')}</span></div>`).join('')}
+      ${chain.map(c => `<div class="kv"><span class="k">${TR(c.name)}</span><span class="v">${fmt(Math.round(c.tpd))} ${TR('ตัน/วัน')}</span></div>`).join('')}
       <div class="tip">ทั้งสี่ควรใกล้เคียงกัน — ตอนนี้ทุกแผนกอยู่ที่ 0 ดาว (1,000 ตัน/วัน) ซึ่งน้อยมาก</div></div>
     <div class="card"><h3>เงินและกำหนดจ่าย</h3>
       <div class="kv"><span class="k">เงินสดตั้งต้น</span><span class="v">฿${fmtM(state.cash)}</span></div>
@@ -443,7 +444,7 @@ function onClick(e) {
     }
     case 'spPane': showSplash(d.v); break;
     case 'spNav': {
-      if (d.v === 'lang') { setLang(LANG === 'en' ? 'th' : 'en'); toast(LANG === 'en' ? 'Switched to English' : 'เปลี่ยนเป็นภาษาไทย'); if (typeof render === 'function' && state && state.started) render(); showSplash(UI.spPane); break; }
+      if (d.v === 'lang') { setLang(LANG === 'en' ? 'th' : 'en'); toast(LANG === 'en' ? 'Switched to English' : 'เปลี่ยนเป็นภาษาไทย'); syncBottomNav(); if (typeof render === 'function' && state && state.started) render(); showSplash(UI.spPane); break; }
       showSplash(d.v);   // home / manual / depts / scoring / sound — เปิดเนื้อหาจริง
       break;
     }
@@ -715,19 +716,19 @@ function renderHUD() {
   document.getElementById('hudChips').innerHTML = `
     <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">วันที่ <b>${s.day} / ${CONFIG.seasonDays}</b></div>
       <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? '🧽 ล้างเครื่อง' : s.started ? `หีบ ${s.crushDaysDone}/${CONFIG.crushDays}` : 'ยังไม่เปิดหีบ'} · ${clockStr(s.dayProgress)}</div></div></div>
-    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${L('เงินสด')}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
+    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
       <div class="val ${s.loan > 0 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
-    <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${L('น้ำตาลวันนี้')}</div>
+    <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${TR('น้ำตาลวันนี้')}</div>
       <div class="val">${fmt(t.sugar, 0)} <small>ตัน</small></div></div></div>
-    <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">${L('ไฟฟ้า')}</div>
+    <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">${TR('ไฟฟ้า')}</div>
       <div class="val">${mw.toFixed(1)} MW<span class="meter"><i style="width:${Math.min(100, mw * 6)}%"></i></span></div></div></div>
-    <div class="chip" style="width:150px" title="ส่งตรงเวลาและคุณภาพคงที่ · สำเร็จ ${s.totals.ordersDone} / พลาด ${s.totals.ordersFailed} · ข้อร้องเรียน ${s.complaints.customer}"><span class="ic" style="background:#e8590c">${s.custSat >= 70 ? '😊' : s.custSat >= 50 ? '😐' : '😟'}</span><div><div class="lbl">${L('ลูกค้า')}</div>
+    <div class="chip" style="width:150px" title="ส่งตรงเวลาและคุณภาพคงที่ · สำเร็จ ${s.totals.ordersDone} / พลาด ${s.totals.ordersFailed} · ข้อร้องเรียน ${s.complaints.customer}"><span class="ic" style="background:#e8590c">${s.custSat >= 70 ? '😊' : s.custSat >= 50 ? '😐' : '😟'}</span><div><div class="lbl">${TR('ลูกค้า')}</div>
       <div class="val ${s.custSat < 55 ? 'dn' : ''}">${Math.round(s.custSat)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ขวัญกำลังใจพนักงาน · ภาระเร่งเครื่อง ${(overdriveLoad(s) * 100).toFixed(0)}% · ข้อร้องเรียนแรงงาน ${s.complaints.labour}"><span class="ic" style="background:#7048e8">${s.staffSat >= 70 ? '💪' : s.staffSat >= 50 ? '😓' : '😡'}</span><div><div class="lbl">${L('พนักงาน')}</div>
+    <div class="chip" style="width:150px" title="ขวัญกำลังใจพนักงาน · ภาระเร่งเครื่อง ${(overdriveLoad(s) * 100).toFixed(0)}% · ข้อร้องเรียนแรงงาน ${s.complaints.labour}"><span class="ic" style="background:#7048e8">${s.staffSat >= 70 ? '💪' : s.staffSat >= 50 ? '😓' : '😡'}</span><div><div class="lbl">${TR('พนักงาน')}</div>
       <div class="val ${s.staffSat < 50 ? 'dn' : ''}">${Math.round(s.staffSat)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ความพึงพอใจชาวไร่ · ราคารับซื้อ ลดคิวรอ ไม่เสียอ้อยให้คู่แข่ง · มีผลต่อปริมาณอ้อยเข้าโรงงานและคะแนน"><span class="ic" style="background:#2f9e44">${s.growerTrust >= 70 ? '🌾' : s.growerTrust >= 50 ? '😐' : '😠'}</span><div><div class="lbl">${L('ชาวไร่')}</div>
+    <div class="chip" style="width:150px" title="ความพึงพอใจชาวไร่ · ราคารับซื้อ ลดคิวรอ ไม่เสียอ้อยให้คู่แข่ง · มีผลต่อปริมาณอ้อยเข้าโรงงานและคะแนน"><span class="ic" style="background:#2f9e44">${s.growerTrust >= 70 ? '🌾' : s.growerTrust >= 50 ? '😐' : '😠'}</span><div><div class="lbl">${TR('ชาวไร่')}</div>
       <div class="val ${s.growerTrust < 50 ? 'dn' : ''}">${Math.round(s.growerTrust)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">${L('ความปลอดภัย')}</div>
+    <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">${TR('ความปลอดภัย')}</div>
       <div class="val ${(s.safety ?? 90) < 50 ? 'dn' : ''}">${Math.round(s.safety ?? 90)}%</div></div></div>`;
   const l3 = document.querySelector('#hud .logo .l3');
   if (l3 && s.player && s.player.name) l3.innerHTML = `ผู้จัดการ <b>${escapeHtml(s.player.name)}</b>${s.started ? '' : ' · ยังไม่เปิดหีบ'}`;
@@ -749,13 +750,13 @@ function renderMissions() {
   const s = state, qs = activeQuests(s);
   document.getElementById('missionList').innerHTML = qs.map(q => {
     const p = questProgress(q);
-    return `<li class="quest"><div class="q-head"><span>${q.icon} ${L(q.title)}</span><b>฿${fmtM(q.reward.cash)}</b></div>
-      <div class="q-desc">${L(q.desc)}</div>
+    return `<li class="quest"><div class="q-head"><span>${q.icon} ${TR(q.title)}</span><b>฿${fmtM(q.reward.cash)}</b></div>
+      <div class="q-desc">${TR(q.desc)}</div>
       <div class="q-bar"><i style="width:${p.pct.toFixed(0)}%"></i></div><div class="q-prog">${p.text}</div></li>`;
   }).join('') || '<li>ทำเควสครบทุกข้อแล้ว 🏆</li>';
   /* ภารกิจรายวัน */
   const daily = (s.daily && s.daily.tasks) || [];
-  if (daily.length) document.getElementById('missionList').innerHTML += `<li class="daily"><div class="q-head"><span>📅 ${L('ภารกิจวันนี้')}</span></div>${daily.map(t => `<div class="d-row ${t.done ? 'done' : ''}"><span class="cb ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</span><span class="d-txt">${L(t.text)}</span><b>+฿${fmtM(t.reward)}</b></div>`).join('')}</li>`;
+  if (daily.length) document.getElementById('missionList').innerHTML += `<li class="daily"><div class="q-head"><span>📅 ${TR('ภารกิจวันนี้')}</span></div>${daily.map(t => `<div class="d-row ${t.done ? 'done' : ''}"><span class="cb ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</span><span class="d-txt">${TR(t.text)}</span><b>+฿${fmtM(t.reward)}</b></div>`).join('')}</li>`;
   const sum = document.querySelector('#missions h3 .sum');
   if (sum) sum.textContent = `${s.questsDone.length}/${QUESTS.length}`;
 }
@@ -901,7 +902,7 @@ function renderMarkers() {
     const popIdx = prev !== undefined && stars > prev ? stars - 1 : -1;
     const D = dept(b.dept);
     const num = b.n > 0 ? b.n + '. ' : '';
-    parts.push(`<button class="marker bld-label ${b.compact ? 'mk-sm' : ''} ${info.alert && !cleaning ? 'alert' : ''}" style="left:${cx.toFixed(0)}px;top:${(cy - 6).toFixed(0)}px" data-action="station" data-key="${b.key}" title="${info.tip}"><span class="dot ${dot}"></span><span class="mk-name">${num}${D ? D.icon : ''} ${L(b.name)}</span>${stars < 0 ? '' : SCENE.starsHTML(stars, popIdx, SCENE.starMax(b.key))}${info.sub ? `<span class="mk-val ${b.compact ? 'sm' : ''} ${info.vcls}">${info.sub}</span>` : ''}</button>`);
+    parts.push(`<button class="marker bld-label ${b.compact ? 'mk-sm' : ''} ${info.alert && !cleaning ? 'alert' : ''}" style="left:${cx.toFixed(0)}px;top:${(cy - 6).toFixed(0)}px" data-action="station" data-key="${b.key}" title="${info.tip}"><span class="dot ${dot}"></span><span class="mk-name">${num}${D ? D.icon : ''} ${TR(b.name)}</span>${stars < 0 ? '' : SCENE.starsHTML(stars, popIdx, SCENE.starMax(b.key))}${info.sub ? `<span class="mk-val ${b.compact ? 'sm' : ''} ${info.vcls}">${info.sub}</span>` : ''}</button>`);
   }
   const html = parts.join('');
   if (html !== lastMarkersHTML) { lastMarkersHTML = html; document.getElementById('markers').innerHTML = html; }
@@ -937,25 +938,25 @@ function showEmergencyModal() {
   const opts = def.options.map((o, i) => {
     const locked = (o.needTeam && teamLv < o.needTeam) || (o.needQC && qcLv < o.needQC);
     return `<button class="emer-opt ${locked ? 'locked' : ''}" data-action="emerChoice" data-i="${i}" ${locked ? 'disabled' : ''}>
-      <b>${L(o.label)}</b>${o.cost ? ` <span class="cost">฿${fmtM(o.cost)}</span>` : ` <span class="cost free">${L('ฟรี')}</span>`}
-      <span class="d">${L(o.desc)}${o.hours ? ` · ${L('ใช้เวลา ~')}${Math.max(1, Math.round(o.hours * (o.needTeam ? up(state, 'ert', 'ertTime') : 1)))} ${L('ชม.')}` : ''}</span>
-      ${locked ? `<span class="d lock">🔒 ${L('ต้องมี')}${o.needQC ? L('ทีมคุณภาพ (ทีม 17)') : L('ทีมตอบสนองเหตุฉุกเฉิน (ทีม 15)')} ${L('อย่างน้อย')} ${o.needQC || o.needTeam} ${L('ดาว')}</span>` : ''}</button>`;
+      <b>${TR(o.label)}</b>${o.cost ? ` <span class="cost">฿${fmtM(o.cost)}</span>` : ` <span class="cost free">${TR('ฟรี')}</span>`}
+      <span class="d">${TR(o.desc)}${o.hours ? ` · ${TR('ใช้เวลา ~')}${Math.max(1, Math.round(o.hours * (o.needTeam ? up(state, 'ert', 'ertTime') : 1)))} ${TR('ชม.')}` : ''}</span>
+      ${locked ? `<span class="d lock">🔒 ${TR('ต้องมี')}${o.needQC ? TR('ทีมคุณภาพ (ทีม 17)') : TR('ทีมตอบสนองเหตุฉุกเฉิน (ทีม 15)')} ${TR('อย่างน้อย')} ${o.needQC || o.needTeam} ${TR('ดาว')}</span>` : ''}</button>`;
   }).join('');
-  showModal(`<h2 style="color:#ff8a8a">🚨 ${L('เหตุฉุกเฉิน')}: ${L(def.name)}</h2>
-    <p><u style="text-decoration:none;color:var(--gold)">${L('สาเหตุ')}</u> ${L(def.cause)}${E.station ? ` · ${L('ที่')} ${L(STATION_META[E.station].name)}` : ''}</p>
-    ${def.fix ? `<div class="ev-advice">💡 <b>${L('คำแนะนำ')}:</b> ${L(def.fix)}</div>` : ''}
-    <p class="tip">${L('ต้องตัดสินใจภายใน')} <b class="dn">${left.toFixed(1)} ${L('ชม.')}</b> ${L('(เวลาในเกม) ไม่เช่นนั้นระบบจะเลือกทางที่แย่ที่สุด')} · ${L('ทีมฉุกเฉิน')} ${teamLv} ${L('ดาว')} · ${L('ทีมคุณภาพ')} ${qcLv} ${L('ดาว')}</p>
+  showModal(`<h2 style="color:#ff8a8a">🚨 ${TR('เหตุฉุกเฉิน')}: ${TR(def.name)}</h2>
+    <p><u style="text-decoration:none;color:var(--gold)">${TR('สาเหตุ')}</u> ${TR(def.cause)}${E.station ? ` · ${TR('ที่')} ${TR(STATION_META[E.station].name)}` : ''}</p>
+    ${def.fix ? `<div class="ev-advice">💡 <b>${TR('คำแนะนำ')}:</b> ${TR(def.fix)}</div>` : ''}
+    <p class="tip">${TR('ต้องตัดสินใจภายใน')} <b class="dn">${left.toFixed(1)} ${TR('ชม.')}</b> ${TR('(เวลาในเกม) ไม่เช่นนั้นระบบจะเลือกทางที่แย่ที่สุด')} · ${TR('ทีมฉุกเฉิน')} ${teamLv} ${TR('ดาว')} · ${TR('ทีมคุณภาพ')} ${qcLv} ${TR('ดาว')}</p>
     <div class="emer-opts">${opts}</div>`);
 }
 function showDecisionModal(d) {
   const ev = EVENTS.find(e => e.id === d.evId); if (!ev) return;
   const left = Math.max(0, d.deadlineH - d.elapsedH), def = ev.choices[ev.defaultChoice || 0];
-  showModal(`<h2>${ev.icon} ${L(ev.name)}</h2>
-    <p><u style="text-decoration:none;color:var(--gold)">${L('สถานการณ์')}</u> ${L(ev.cause)}</p>
-    ${ev.effect ? `<p class="ev-effect">⚠️ ${L('ผลกระทบ')}: ${L(ev.effect)}</p>` : ''}
-    ${ev.fix ? `<div class="ev-advice">💡 <b>${L('คำแนะนำ')}:</b> ${L(ev.fix)}</div>` : ''}
-    <p class="tip">${L('ตัดสินใจภายใน')} <b>${left.toFixed(1)} ${L('ชม.')}</b> ${L('(เวลาในเกม) ไม่เช่นนั้นระบบใช้')} "${L(def.label)}"</p>
-    <div class="emer-opts">${ev.choices.map((c, i) => `<button class="emer-opt dec" data-action="decide" data-ev="${ev.id}" data-i="${i}"><b>${L(c.label)}</b><span class="d">${L(c.desc)}</span></button>`).join('')}</div>`);
+  showModal(`<h2>${ev.icon} ${TR(ev.name)}</h2>
+    <p><u style="text-decoration:none;color:var(--gold)">${TR('สถานการณ์')}</u> ${TR(ev.cause)}</p>
+    ${ev.effect ? `<p class="ev-effect">⚠️ ${TR('ผลกระทบ')}: ${TR(ev.effect)}</p>` : ''}
+    ${ev.fix ? `<div class="ev-advice">💡 <b>${TR('คำแนะนำ')}:</b> ${TR(ev.fix)}</div>` : ''}
+    <p class="tip">${TR('ตัดสินใจภายใน')} <b>${left.toFixed(1)} ${TR('ชม.')}</b> ${TR('(เวลาในเกม) ไม่เช่นนั้นระบบใช้')} "${TR(def.label)}"</p>
+    <div class="emer-opts">${ev.choices.map((c, i) => `<button class="emer-opt dec" data-action="decide" data-ev="${ev.id}" data-i="${i}"><b>${TR(c.label)}</b><span class="d">${TR(c.desc)}</span></button>`).join('')}</div>`);
 }
 function renderEmergencyBanner() {
   let b = document.getElementById('emerBanner');
@@ -966,15 +967,15 @@ function renderEmergencyBanner() {
     if (!b) { b = document.createElement('button'); b.id = 'emerBanner'; b.dataset.action = 'emerShow'; document.getElementById('stage').appendChild(b); }
     const ev = EVENTS.find(e => e.id === d.evId);
     b.className = 'decision waiting';
-    b.innerHTML = `${ev.icon} <b>${L(ev.name)}</b> — ${L('รอตัดสินใจ อีก')} ${Math.max(0, d.deadlineH - d.elapsedH).toFixed(1)} ${L('ชม.')} <span class="act">${L('คลิกเพื่อเลือก')}</span>`;
+    b.innerHTML = `${ev.icon} <b>${TR(ev.name)}</b> — ${TR('รอตัดสินใจ อีก')} ${Math.max(0, d.deadlineH - d.elapsedH).toFixed(1)} ${TR('ชม.')} <span class="act">${TR('คลิกเพื่อเลือก')}</span>`;
     return;
   }
   if (b) b.className = '';
   if (!b) { b = document.createElement('button'); b.id = 'emerBanner'; b.dataset.action = 'emerShow'; document.getElementById('stage').appendChild(b); }
   const def = EMERGENCIES.find(d => d.id === E.id);
   b.innerHTML = E.choice === null
-    ? `${def.icon} <b>${L(def.name)}</b> — ${L('รอคำสั่งการ อีก')} ${Math.max(0, E.deadlineH - E.elapsedH).toFixed(1)} ${L('ชม.')} <span class="act">${L('คลิกเพื่อตัดสินใจ')}</span>`
-    : `${def.icon} <b>${L(def.name)}</b> — ${L('กำลังแก้ไข')}: ${L(E.optLabel)} (${L('เหลือ')} ${Math.max(0, E.resolveAtH - E.elapsedH).toFixed(1)} ${L('ชม.')})`;
+    ? `${def.icon} <b>${TR(def.name)}</b> — ${TR('รอคำสั่งการ อีก')} ${Math.max(0, E.deadlineH - E.elapsedH).toFixed(1)} ${TR('ชม.')} <span class="act">${TR('คลิกเพื่อตัดสินใจ')}</span>`
+    : `${def.icon} <b>${TR(def.name)}</b> — ${TR('กำลังแก้ไข')}: ${TR(E.optLabel)} (${TR('เหลือ')} ${Math.max(0, E.resolveAtH - E.elapsedH).toFixed(1)} ${TR('ชม.')})`;
   b.classList.toggle('waiting', E.choice === null);
 }
 function showEventBanner(evs) {
@@ -985,6 +986,18 @@ function showEventBanner(evs) {
       <span><u>ผลกระทบ</u> ${e.effect}</span>
       <span class="fix"><u>ทางแก้</u> ${e.fix}</span></div></div>`).join('')}
     <div class="modal-actions"><button class="btn primary" data-action="closeModal">รับทราบ</button></div>`);
+}
+
+/* แปลปุ่มเมนูล่าง (HTML คงที่) ตามภาษา */
+function syncBottomNav() {
+  const m = { overview: ['📊', 'Overview', 'ภาพรวม'], production: ['🏭', 'Production', 'การผลิต'], kpi: ['🎯', 'KPI', 'KPI'],
+    orders: ['📋', 'Orders', 'คำสั่งซื้อ'], finance: ['💰', 'Finance', 'การเงิน'], upgrades: ['⬆️', 'Upgrade', 'อัปเกรด'],
+    advisor: ['🧑‍💼', 'Advisor', 'ที่ปรึกษา'], reports: ['📈', 'Report', 'รายงาน'] };
+  document.querySelectorAll('#bottomNav button[data-tab]').forEach(b => {
+    const t = m[b.dataset.tab]; if (!t) return;
+    const badge = b.querySelector('.nav-badge');
+    b.innerHTML = `<span>${t[0]}</span>${LANG === 'en' ? t[1] : t[2]}` + (badge ? badge.outerHTML : '');
+  });
 }
 
 /* ============================ Drawer ============================ */
@@ -999,8 +1012,8 @@ function renderDrawer() {
   dr.classList.remove('hidden');
   document.getElementById('app').classList.add('drawer-open');
   document.querySelectorAll('#bottomNav button').forEach(b => b.classList.toggle('active', b.dataset.tab === UI.tab));
-  let title = TAB_TITLES[UI.tab] || '';
-  if (UI.station && STATION_META[UI.station]) title = `🏭 ${STATION_META[UI.station].name} (${STATION_META[UI.station].en})`;
+  let title = TR(TAB_TITLES[UI.tab] || '');
+  if (UI.station && STATION_META[UI.station]) title = `🏭 ${TR(STATION_META[UI.station].name)} (${STATION_META[UI.station].en})`;
   document.getElementById('drawerTitle').textContent = title;
   const body = document.getElementById('drawerBody');
   const sc = body.scrollTop;
@@ -1425,7 +1438,7 @@ function showSeasonEnd() {
       profit: R.profit, cane: R.caneTotal, sugar: R.sugarTotal, days: R.days });
   }
   const K = R.kpi, T = s.totals;
-  const SC = SCORE_SPEC.map(sp => [sp.icon + ' ' + L(sp.name), sp.key, sp.w]);
+  const SC = SCORE_SPEC.map(sp => [sp.icon + ' ' + TR(sp.name), sp.key, sp.w]);
   const bar = (name, v, w) => `<div class="sc-row"><span>${name} <small style="color:#c9a94a">(นน.${w})</small></span><div class="sc-bar"><i style="width:${v.toFixed(0)}%;background:${v >= 70 ? '#4cd47a' : v >= 45 ? '#ffb547' : '#ff5c5c'}"></i></div><b>${Math.round(v / 100 * w)}/${w}</b></div>`;
   const revTot = R.revenue.sugar + R.revenue.molasses + R.revenue.power;
   const costTot = Object.values(R.cost).reduce((a, b) => a + b, 0);

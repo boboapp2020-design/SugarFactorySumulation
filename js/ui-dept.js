@@ -34,7 +34,7 @@ function overdriveRow(id) {
   return `<div class="card compact od-card"><h3>⏫ เร่งอัตรากำลัง</h3>
     <div class="od-row">${OVERDRIVE.map((o, i) =>
       `<button class="od-btn ${i === cur ? 'on' : ''}" data-action="over" data-id="${id}" data-v="${i}" title="${o.tip}">${o.label}</button>`).join('')}</div>
-    <div class="tip">${L(OVERDRIVE[cur].name)} — ${L(OVERDRIVE[cur].tip)}${cur > 0
+    <div class="tip">${TR(OVERDRIVE[cur].name)} — ${TR(OVERDRIVE[cur].tip)}${cur > 0
       ? ` · ค่าพลังลดเร็วขึ้น <b>${Math.pow(OVERDRIVE[cur].v, 3).toFixed(1)} เท่า</b> · ขวัญกำลังใจพนักงานลดลง`
       : ''}</div></div>`;
 }
@@ -65,7 +65,7 @@ const fmtDP = (k, v) => {
   const m = DPARAM[k] || {};
   if (m.money) return '฿' + fmt(v);
   if (m.pct) return Math.round(v * 100) + '%';
-  return (Math.abs(v) < 10 && !Number.isInteger(v) ? v.toFixed(2) : fmt(Math.round(v))) + (m.u || '');
+  return (Math.abs(v) < 10 && !Number.isInteger(v) ? v.toFixed(2) : fmt(Math.round(v))) + TR(m.u || '');
 };
 
 function deptCapabilityHTML(id) {
@@ -73,19 +73,19 @@ function deptCapabilityHTML(id) {
   const cur = d.levels[star], nxt = star < d.maxStar ? d.levels[star + 1] : null;
   const keys = Object.keys(cur).filter(k => k !== 'name' && k !== 'cost' && DPARAM[k]);
   return `<div class="card"><h3>📊 ความสามารถตอนนี้</h3>
-    <div class="kv"><span class="k">${L('อุปกรณ์/ทีม')}</span><span class="v">${L(cur.name)}</span></div>
+    <div class="kv"><span class="k">${TR('อุปกรณ์/ทีม')}</span><span class="v">${TR(cur.name)}</span></div>
     ${keys.map(k => {
       const a = cur[k], b = nxt ? nxt[k] : null;
       const lower = (DPARAM[k] || {}).lower;
       const better = b !== null && (lower ? b < a : b > a);
-      return `<div class="cap-row"><span class="k">${DPARAM[k].n}</span>
+      return `<div class="cap-row"><span class="k">${TR(DPARAM[k].n)}</span>
         <span class="cap-now">${fmtDP(k, a)}</span>
         ${b !== null && b !== a ? `<span class="cap-arrow ${better ? 'up' : 'dn'}">→</span><span class="cap-next ${better ? 'up' : 'dn'}">${fmtDP(k, b)}</span>` : ''}</div>`;
     }).join('')}
     ${d.kind === 'machine' ? `<div class="cap-row"><span class="k">ค่าพลังลดต่อวัน</span>
       <span class="cap-now">${(POWER_DRAIN[Math.min(star, 5)] * 24).toFixed(1)}%</span>
       ${star < d.maxStar ? `<span class="cap-arrow up">→</span><span class="cap-next up">${(POWER_DRAIN[Math.min(star + 1, 5)] * 24).toFixed(1)}%</span>` : ''}</div>` : ''}
-    <div class="tip">${L(d.chain || d.role)}</div></div>`;
+    <div class="tip">${TR(d.chain || d.role)}</div></div>`;
 }
 
 /* ข้อความสรุปว่าอัปอีก 1 ดาวได้อะไร */
@@ -97,7 +97,7 @@ function deptDiffText(id, fromStar) {
   for (const k of Object.keys(b)) {
     if (k === 'name' || k === 'cost' || !DPARAM[k] || b[k] === a[k]) continue;
     const lower = (DPARAM[k] || {}).lower, better = lower ? b[k] < a[k] : b[k] > a[k];
-    out.push(`<b class="${better ? 'up' : 'dn'}">${DPARAM[k].n} ${fmtDP(k, a[k])}→${fmtDP(k, b[k])}</b>`);
+    out.push(`<b class="${better ? 'up' : 'dn'}">${TR(DPARAM[k].n)} ${fmtDP(k, a[k])}→${fmtDP(k, b[k])}</b>`);
   }
   return out.join(' · ');
 }
@@ -107,10 +107,10 @@ function deptUpgradeHTML(id) {
   const d = dept(id), star = dStar(state, id), max = star >= d.maxStar;
   const cost = max ? 0 : d.levels[star + 1].cost;
   const afford = state.cash >= cost;
-  return `<div class="card up-card"><h3>${d.icon} ${L('อัปเกรด')}${L(d.name)}</h3>
+  return `<div class="card up-card"><h3>${d.icon} ${TR('อัปเกรด')}${TR(d.name)}</h3>
     <div class="up-stars">${starRow(id)}</div>
     ${max ? '<div class="tip good">อัปเกรดครบทุกดาวแล้ว</div>' : `
-      <div class="up-next"><b>${L('ดาวถัดไป')}:</b> ${L(d.levels[star + 1].name)}</div>
+      <div class="up-next"><b>${TR('ดาวถัดไป')}:</b> ${TR(d.levels[star + 1].name)}</div>
       <div class="up-diff">${deptDiffText(id, star)}</div>
       <button class="btn ${afford ? 'primary' : 'credit'}" data-action="buy" data-id="${id}">
         ⭐ อัปเป็น ${star + 1} ดาว · ฿${fmtM(cost)}${afford ? '' : ` 🏦 กู้เพิ่ม ฿${fmtM(cost - state.cash)}`}</button>
@@ -123,10 +123,10 @@ function deptUpgradeHTML(id) {
 function deptPanel(id) {
   const d = dept(id), s = state, x = s.dept[id];
   if (!d || !x) return '<div class="card">ไม่พบแผนกนี้</div>';
-  const head = `<div class="card dept-head"><h3>${d.icon} ${d.no ? (LANG==='en'?'Team '+d.no+' — ':'ทีมที่ ' + d.no + ' — ') : ''}${L(d.name)}</h3>
+  const head = `<div class="card dept-head"><h3>${d.icon} ${d.no ? (LANG==='en'?'Team '+d.no+' — ':'ทีมที่ ' + d.no + ' — ') : ''}${TR(d.name)}</h3>
     <div class="up-stars">${starRow(id)}</div>
-    <div class="tip">${L(d.role)}</div>
-    <div class="kv"><span class="k">${L('ตัวชี้วัด')}</span><span class="v">${L(d.metric)}</span></div></div>`;
+    <div class="tip">${TR(d.role)}</div>
+    <div class="kv"><span class="k">${TR('ตัวชี้วัด')}</span><span class="v">${TR(d.metric)}</span></div></div>`;
 
   let extra = '';
   if (d.kind === 'machine') {
@@ -412,7 +412,7 @@ function viewUpgrades() {
   return `<div class="card"><h3>💰 เงินสด ฿${fmtM(s.cash)}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</h3>
       <div class="tip">อัปเกรดทีละ 1 ดาว · เครื่องจักรที่อัปเกรดจะได้ค่าพลังคืน 100%</div></div>`
     + bottleneckHTML()
-    + groups.map(g => `<h2 class="grp">${L(DEPT_GROUPS[g].name)}</h2>
+    + groups.map(g => `<h2 class="grp">${TR(DEPT_GROUPS[g].name)}</h2>
         <div class="tip grp-tip">${DEPT_GROUPS[g].tip}</div>
         ${DEPTS.filter(d => d.group === g).map(d => deptRowHTML(d)).join('')}`).join('');
 }
@@ -486,7 +486,7 @@ function scoreCardHTML() {
       const v = Math.min(100, sc[sp.key] || 0);
       const cls = v >= 75 ? 'good' : v >= 50 ? 'warn' : 'bad';
       const pts = Math.round(v / 100 * sp.w);
-      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${L(sp.name)} <small style="color:var(--gold-2)">(นน.${sp.w})</small></span>
+      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${TR(sp.name)} <small style="color:var(--gold-2)">(นน.${sp.w})</small></span>
         <span class="sc-bar"><i class="${cls}" style="width:${v}%"></i></span>
         <span class="sc-val ${cls}">${pts}/${sp.w}</span></div>
         <div class="tip sc-tip">${sp.tip}</div>`;
