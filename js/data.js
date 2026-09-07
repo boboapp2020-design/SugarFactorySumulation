@@ -33,7 +33,7 @@ const CONFIG = {
 
   /* --- ราคาและต้นทุน --- */
   canePriceBase: 1180,           // ฿/ตัน ที่ 10 CCS
-  canePricePerCCS: 62,
+  canePricePerCCS: 70,          // ~6% ของราคาฐาน 1180 = step ต่อ CCS ตามจริง (สอน./OCSB)
   caneUpfront: 0.72,
   canePayEvery: 7,               // จ่ายค่าอ้อยทุก 7 วัน
   wagePayEvery: 15,              // จ่ายค่าจ้างทุก 15 วัน
@@ -94,8 +94,8 @@ const CONFIG = {
 
   /* --- อ้อยค้าง (cane-brain: CCS ลด 1.0 หน่วย/วัน กลางฤดู) --- */
   ccsLossPerHour: 0.042,
-  polDecayFresh: 0.020,
-  polDecayOld: 0.055,
+  polDecayFresh: 0.042,         // ตรงกับที่ UI โฆษณา (0.042/ชม. ≈ 1.0 CCS/วัน กลางฤดู · cane-brain)
+  polDecayOld: 0.075,          // >24 ชม. เสื่อมเร็วกว่า ~1.8x
   burntDecayMult: 1.8,
   dextranAfterH: 24,
   caneRotHours: 96,
@@ -127,7 +127,7 @@ const CANE_SOURCES = {
                priceMult: 1.00, maxShare: 1.00, tip: 'มาตรฐาน ตัดถึงหีบ 18 ชม. หาได้มาก' },
   mech:      { name: 'อ้อยรถตัด',       icon: '🚜', ccs: -0.4, trash: 9.5, burnt: false, cutToCrush: 12,
                priceMult: 0.97, maxShare: 0.60, tip: 'ส่งสม่ำเสมอ แต่ยอด-ใบปนมาก ทุก 1% trash ทำ CCS ลด 0.18' },
-  burnt:     { name: 'อ้อยไฟไหม้',      icon: '🔥', ccs: -1.6, trash: 4.0, burnt: true,  cutToCrush: 14,
+  burnt:     { name: 'อ้อยไฟไหม้',      icon: '🔥', ccs: -1.1, trash: 4.0, burnt: true,  cutToCrush: 14,
                priceMult: 0.92, maxShare: 0.70, tip: 'ราคาถูก แต่ CCS ต่ำ เสื่อมเร็ว 1.8 เท่า เกิน 24 ชม. เกิด dextran' },
 };
 
@@ -234,6 +234,18 @@ const EVENTS = [
         apply: s => { pay(s, 600_000, 'penalty'); addMod(s, 'harvestCap', -0.10, 2, 'ฝน'); addMod(s, 'ccs', -0.3, 2, 'อ้อยเปียก'); } },
       { label: 'รับสภาพ รอฝนหยุด', desc: 'อ้อยเข้าลด 35% เป็นเวลา 2 วัน',
         apply: s => addMod(s, 'harvestCap', -0.35, 2, 'ฝนตกหนัก') },
+    ], defaultChoice: 1, deadlineH: 6 },
+
+  { id: 'drought', icon: '☀️', name: 'ภัยแล้งในเขตส่งเสริม', group: 'cane', p: 0.045,
+    cause: 'ฝนทิ้งช่วง อ้อยขาดน้ำ ผลผลิตต่อไร่ลดและชาวไร่ชะลอตัด',
+    effect: 'อ้อยเข้าโรงงานลด 22% เป็นเวลา 4 วัน (แต่อ้อยเครียดน้ำ Brix สูงขึ้นเล็กน้อย CCS +0.2)',
+    fix: 'ดูแลชาวไร่/สนับสนุนแหล่งน้ำ และกระจายพื้นที่รับซื้อ',
+    apply: s => { addMod(s, 'harvestCap', -0.22, 4, 'ภัยแล้ง'); addMod(s, 'ccs', +0.2, 4, 'อ้อยเครียดน้ำ'); },
+    choices: [
+      { label: 'อุดหนุนค่าสูบน้ำให้ชาวไร่ประจำ ฿700k', desc: 'อ้อยเข้าลดแค่ 8% และผูกใจชาวไร่ (เชื่อมั่น +)',
+        apply: s => { pay(s, 700_000, 'penalty'); addMod(s, 'harvestCap', -0.08, 4, 'ภัยแล้ง'); addMod(s, 'ccs', +0.2, 4, 'อ้อยเครียดน้ำ'); s.growerTrust = clamp(s.growerTrust + 5, 0, 100); } },
+      { label: 'รับสภาพ รออ้อยแปลงอื่น', desc: 'อ้อยเข้าลด 22% เป็นเวลา 4 วัน',
+        apply: s => { addMod(s, 'harvestCap', -0.22, 4, 'ภัยแล้ง'); addMod(s, 'ccs', +0.2, 4, 'อ้อยเครียดน้ำ'); } },
     ], defaultChoice: 1, deadlineH: 6 },
 
   { id: 'burnt_surge', icon: '🔥', name: 'อ้อยไฟไหม้ทะลักเข้าโรงงาน', group: 'cane', p: 0.055,

@@ -1540,7 +1540,7 @@ function buildHints(s) {
     else if (st.power < 25) add('bad', `${STATION_META[k].name}ค่าพลังเหลือ ${Math.round(st.power)}% — ถึง 0 จะพังทั้งสาย ควรหยุดล้างเครื่องหรือซ่อมด่วน`);
     else if (st.power < 50) add('warn', `${STATION_META[k].name}ค่าพลัง ${Math.round(st.power)}% ประสิทธิภาพเริ่มตกแล้ว`);
   }
-  if (s.water.level / s.water.cap > 0.8) add('warn', `บ่อบำบัด ${Math.round(s.water.level / s.water.cap * 100)}% ล้นแล้วปรับ ฿2,200/m³`);
+  if (s.water.level / s.water.cap > 0.8) add('warn', `บ่อบำบัด ${Math.round(s.water.level / s.water.cap * 100)}% ล้นแล้วปรับ ฿${fmt(CONFIG.waterFinePerM3)}/m³`);
 
   /* --- ถังกากน้ำตาล --- */
   const mc = up(s, 'molTank', 'molCap'), mp = s.stock.molasses / mc;
