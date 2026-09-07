@@ -301,16 +301,8 @@ function splashPane(pane, saved, name) {
     return `
     <div class="sp-head"><h2>🏆 อันดับผู้จัดการโรงงาน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
-      <p>อันดับจาก <b>คะแนนรวม (เต็ม 1,000)</b> ตอนปิดฤดูกาล · ${shared ? '🌐 กระดานส่วนกลาง (Google Sheet)' : '💾 บันทึกในเครื่องนี้'}</p>
+      <p>อันดับจาก <b>คะแนนรวม (เต็ม 1,000)</b> ตอนปิดฤดูกาล · ${shared ? '🌐 กระดานส่วนกลาง — แข่งกับทุกคนที่เล่น' : '💾 บันทึกในเครื่องนี้'}</p>
       <div id="lbList" class="lb-list"><div class="tip">กำลังโหลด…</div></div>
-      <div class="lb-cfg">
-        <div class="sp-row"><span>เชื่อม Google Sheet (วาง Web App URL ที่ลงท้าย /exec)</span></div>
-        <div class="lb-cfg-row">
-          <input id="lbUrl" class="lb-url" type="text" placeholder="https://script.google.com/macros/s/.../exec" value="${escapeHtml(Leaderboard.url())}">
-          <button class="sp-btn sm" data-action="lbSaveUrl">บันทึก URL</button>
-        </div>
-        <p class="sp-note">อยากแข่งกับเพื่อนบนกระดานเดียวกัน? ทำตามไฟล์ <b>SHEET_SETUP.md</b> (สร้าง Apps Script ในชีตของคุณ → Deploy เป็น Web app → เอา URL มาวางที่นี่). ถ้าอยากให้ทุกคนใช้กระดานเดียวกันอัตโนมัติ ส่ง URL มาให้ฝังในเกมได้</p>
-      </div>
     </div>
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">กลับหน้าแรก</button></div>`;
   }
