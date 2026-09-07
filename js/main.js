@@ -1421,16 +1421,35 @@ function showSeasonEnd() {
     </div>
 
     ${(() => {
-      const interest = R.cost.interest || 0, dep = R.cost.upgrade || 0;   // ค่าเสื่อม/เงินลงทุน = capex อัปเกรดทั้งฤดู
-      const net = R.profit, ebit = net + interest, ebitda = ebit + dep;
+      /* งบกำไรขาดทุนแบบ accrual (IAS 1/16) — CapEx ไม่ใช่ค่าใช้จ่าย คิดเป็นค่าเสื่อมราคาเท่านั้น */
+      const revenue = R.revenue.sugar + R.revenue.molasses + R.revenue.power;
+      const opex = R.cost.cane + R.cost.fixed + R.cost.labor + R.cost.repair + R.cost.other;   // ต้นทุนดำเนินงาน (ไม่รวม CapEx/ดอกเบี้ย/ภาษี)
+      const capex = R.cost.upgrade || 0, interest = R.cost.interest || 0;
+      const yearFrac = (R.days || 130) / 365;
+      const dep = (CONFIG.plantBaseValue + capex) / CONFIG.assetLifeYears * yearFrac;           // ค่าเสื่อมราคา straight-line ปันตามวัน
+      const ebitda = revenue - opex;
+      const ebit = ebitda - dep;
+      const ebt = ebit - interest;
+      const tax = Math.max(0, ebt) * CONFIG.corpTaxRate;                                        // ภาษี 20% เฉพาะกำไร
+      const net = ebt - tax;
+      const cashFlow = net + dep + tax - capex;   // กระแสเงินสด: บวกกลับค่าเสื่อม+ภาษีค้างจ่าย หัก CapEx จริง
       const sgn = v => (v >= 0 ? 'up' : 'dn');
-      return `<div class="card fin-card"><h3>📊 สรุปทางการเงิน (Financial Summary)</h3>
-        <div class="fin-row"><span><b>EBITDA</b> <small>กำไรก่อนดอกเบี้ย ภาษี ค่าเสื่อม (กำไรจากการดำเนินงาน)</small></span><b class="${sgn(ebitda)}">฿${fmtM(ebitda)}</b></div>
-        <div class="fin-row sub"><span>− ค่าเสื่อม/เงินลงทุน (D&A · อัปเกรดโรงงาน)</span><span class="dn">฿${fmtM(dep)}</span></div>
-        <div class="fin-row"><span><b>EBIT</b> <small>กำไรก่อนดอกเบี้ยและภาษี</small></span><b class="${sgn(ebit)}">฿${fmtM(ebit)}</b></div>
-        <div class="fin-row sub"><span>− ดอกเบี้ยเงินกู้</span><span class="dn">฿${fmtM(interest)}</span></div>
-        <div class="fin-row total"><span><b>Net Profit</b> <small>กำไรสุทธิทั้งฤดู</small></span><b class="${sgn(net)}">฿${fmtM(net)}</b></div>
-        <div class="tip">EBITDA วัดความสามารถทำกำไรจากการดำเนินงานจริง (ไม่รวมภาระดอกเบี้ยและการลงทุน) · ถ้า EBITDA บวกแต่ Net ติดลบ แปลว่าดำเนินงานได้ดี แต่ลงทุน/กู้หนักเกินไปในฤดูนี้</div></div>`;
+      const M = v => `฿${fmtM(v)}`;
+      return `<div class="card fin-card"><h3>📊 งบกำไรขาดทุน (Financial Summary)</h3>
+        <div class="fin-row"><span>รายได้รวม (Revenue)</span><span>${M(revenue)}</span></div>
+        <div class="fin-row sub"><span>− ต้นทุนดำเนินงาน (อ้อย/แรงงาน/เคมี/ซ่อม/คงที่)</span><span class="dn">${M(opex)}</span></div>
+        <div class="fin-row"><span><b>EBITDA</b> <small>กำไรก่อนดอกเบี้ย ภาษี ค่าเสื่อม</small></span><b class="${sgn(ebitda)}">${M(ebitda)}</b></div>
+        <div class="fin-row sub"><span>− ค่าเสื่อมราคา (D&A · โรงงาน+อัปเกรด ÷ ${CONFIG.assetLifeYears} ปี)</span><span class="dn">${M(dep)}</span></div>
+        <div class="fin-row"><span><b>EBIT</b> <small>กำไรจากการดำเนินงาน</small></span><b class="${sgn(ebit)}">${M(ebit)}</b></div>
+        <div class="fin-row sub"><span>− ดอกเบี้ยจ่าย (Finance cost)</span><span class="dn">${M(interest)}</span></div>
+        <div class="fin-row"><span><b>EBT</b> <small>กำไรก่อนภาษี</small></span><b class="${sgn(ebt)}">${M(ebt)}</b></div>
+        <div class="fin-row sub"><span>− ภาษีเงินได้นิติบุคคล ${(CONFIG.corpTaxRate * 100).toFixed(0)}%</span><span class="dn">${M(tax)}</span></div>
+        <div class="fin-row total"><span><b>Net Profit</b> <small>กำไรสุทธิทางบัญชี (หลังภาษี)</small></span><b class="${sgn(net)}">${M(net)}</b></div>
+        <div class="fin-bridge">
+          <div class="fin-row sub"><span>🔄 กระทบยอดเป็นเงินสด: กำไรสุทธิ + ค่าเสื่อม ${M(dep)} + ภาษีค้างจ่าย ${M(tax)} − เงินลงทุน CapEx ${M(capex)}</span></div>
+          <div class="fin-row"><span><b>= กระแสเงินสดสุทธิ</b> <small>ตัวที่ใช้ตัดเกรด/เงื่อนไขผ่าน</small></span><b class="${sgn(cashFlow)}">${M(cashFlow)}</b></div>
+        </div>
+        <div class="tip">CapEx อัปเกรด ${M(capex)} เป็นการ<b>ลงทุนซื้อสินทรัพย์</b> (ขึ้นงบดุล) ไม่ใช่ค่าใช้จ่าย — งบกำไรขาดทุนรับรู้แค่<b>ค่าเสื่อมราคา</b>ทีละน้อย · กำไรทางบัญชีจึงต่างจากกระแสเงินสด: ปีที่ลงทุนหนัก เงินสดหดแต่กำไรทางบัญชียังดี เพราะสินทรัพย์ทยอยตัดค่าเสื่อมในฤดูถัดไป</div></div>`;
     })()}
 
     <div class="card"><h3>คะแนนรายด้าน (ถ่วงน้ำหนัก เต็ม 1,000)</h3>${SC.map(([n, k, w]) => bar(n, R.scores[k], w)).join('')}</div>

@@ -289,6 +289,9 @@ canvas.chart { width: 100%; height: 150px; display: block; background: rgba(0, 0
 .fin-card .fin-row.total { border-top: 2px solid var(--gold); border-bottom: none; margin-top: 4px; padding-top: 10px; }
 .fin-card .fin-row.total b { font-size: 20px; }
 .fin-card .up { color: #6fe08a; } .fin-card .dn { color: #ff7a7a; }
+.fin-bridge { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--line); }
+.fin-bridge .fin-row.sub { color: #9fb0c4; font-size: 12px; font-style: italic; }
+.fin-bridge .fin-row.sub span { border: none; }
 .confirm-box { text-align: center; }
 .confirm-box h2 { margin: 0 0 14px; }
 .confirm-msg { font-size: 16px; line-height: 1.6; margin: 0 0 24px; color: #e8eef6; }
