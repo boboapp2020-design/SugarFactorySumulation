@@ -158,6 +158,21 @@ function heroSVG() {
 /* ป้ายเมนูบนสุด (ตกแต่ง — ฝังทับให้ตรงกับภาพ hero) */
 const SP_NAV = ['หน้าแรก', 'เกี่ยวกับเกม', 'ฟีเจอร์', 'แกลเลอรี', 'ดาวน์โหลด'];
 
+/* เติมตารางอันดับ (async — ดึงจาก Sheet/เครื่อง) */
+function renderLeaderboard() {
+  const el = document.getElementById('lbList'); if (!el) return;
+  Leaderboard.fetchTop((rows, remote) => {
+    if (!document.getElementById('lbList')) return;
+    if (!rows || !rows.length) { el.innerHTML = '<div class="tip">ยังไม่มีคะแนน — เล่นจบฤดูกาลแล้วคะแนนจะมาปรากฏที่นี่</div>'; return; }
+    el.innerHTML = `<div class="lb-row lb-head"><span class="lb-rank">#</span><span class="lb-name">ผู้จัดการ</span><span class="lb-grade">เกรด</span><span class="lb-score">คะแนน</span></div>`
+      + rows.slice(0, 50).map((r, i) => `<div class="lb-row ${i < 3 ? 'top' : ''}">
+        <span class="lb-rank">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1)}</span>
+        <span class="lb-name">${escapeHtml(String(r.name || 'ผู้เล่น'))}</span>
+        <span class="lb-grade">${escapeHtml(String(r.grade || '-'))}</span>
+        <span class="lb-score">${fmt(Math.round(r.score || 0))}</span></div>`).join('');
+  });
+}
+
 function showSplash(pane) {
   const sp = document.getElementById('splash');
   const saved = UI.hadSave && !state.ended;
@@ -185,8 +200,8 @@ function showSplash(pane) {
       mx = (Math.random() * 50 - 25).toFixed(0), my = (Math.random() * 30 - 15).toFixed(0);
     flies += `<u style="left:${x}%;top:${y}%;--dur:${dur}s;--delay:${delay}s;--mx:${mx}px;--my:${my}px"></u>`;
   }
-  const navItems = [['home', '🏠 หน้าแรก'], ['manual', '📖 วิธีเล่น'], ['depts', '🏭 18 แผนก'], ['scoring', '🏅 การวัดผล'], ['sound', '⚙️ ตั้งค่า']];
-  const cur = UI.spPane === 'manual' ? 'manual' : UI.spPane === 'depts' ? 'depts' : UI.spPane === 'scoring' ? 'scoring' : UI.spPane === 'sound' ? 'sound' : 'home';
+  const navItems = [['home', '🏠 หน้าแรก'], ['manual', '📖 วิธีเล่น'], ['depts', '🏭 18 แผนก'], ['scoring', '🏅 การวัดผล'], ['ranking', '🏆 จัดอันดับ'], ['sound', '⚙️ ตั้งค่า']];
+  const cur = navItems.some(([v]) => v === UI.spPane) ? UI.spPane : 'home';
   const nav = navItems.map(([v, t]) =>
     `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${t}</button>`).join('');
   sp.innerHTML = `
@@ -279,6 +294,26 @@ function splashPane(pane, saved, name) {
       <p class="sp-note">การบริหารรวม <b>ปริมาณอ้อยเข้าหีบ</b> (เป้า 700,000 ตัน) เข้าไปด้วย · เป้ากำไรสุทธิ ฿200 ล้าน · โหมดยากอย่างเดียว · เงินสดติดลบไม่ได้ (กู้ได้ แต่ดอกยิ่งกู้ยิ่งแพง)</p>
     </div>
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เข้าใจแล้ว</button></div>`;
+
+  if (pane === 'ranking') {
+    setTimeout(renderLeaderboard, 30);
+    const shared = Leaderboard.isShared();
+    return `
+    <div class="sp-head"><h2>🏆 อันดับผู้จัดการโรงงาน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-scroll">
+      <p>อันดับจาก <b>คะแนนรวม (เต็ม 1,000)</b> ตอนปิดฤดูกาล · ${shared ? '🌐 กระดานส่วนกลาง (Google Sheet)' : '💾 บันทึกในเครื่องนี้'}</p>
+      <div id="lbList" class="lb-list"><div class="tip">กำลังโหลด…</div></div>
+      <div class="lb-cfg">
+        <div class="sp-row"><span>เชื่อม Google Sheet (วาง Web App URL ที่ลงท้าย /exec)</span></div>
+        <div class="lb-cfg-row">
+          <input id="lbUrl" class="lb-url" type="text" placeholder="https://script.google.com/macros/s/.../exec" value="${escapeHtml(Leaderboard.url())}">
+          <button class="sp-btn sm" data-action="lbSaveUrl">บันทึก URL</button>
+        </div>
+        <p class="sp-note">อยากแข่งกับเพื่อนบนกระดานเดียวกัน? ทำตามไฟล์ <b>SHEET_SETUP.md</b> (สร้าง Apps Script ในชีตของคุณ → Deploy เป็น Web app → เอา URL มาวางที่นี่). ถ้าอยากให้ทุกคนใช้กระดานเดียวกันอัตโนมัติ ส่ง URL มาให้ฝังในเกมได้</p>
+      </div>
+    </div>
+    <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">กลับหน้าแรก</button></div>`;
+  }
 
   if (pane === 'sound') return `
     <div class="sp-head"><h2>🔊 ตั้งค่าเสียง</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
@@ -420,6 +455,7 @@ function onClick(e) {
       showSplash(d.v);   // home / manual / depts / scoring / sound — เปิดเนื้อหาจริง
       break;
     }
+    case 'lbSaveUrl': { const inp = document.getElementById('lbUrl'); if (inp) { Leaderboard.setUrl(inp.value); toast(inp.value.trim() ? '🌐 เชื่อม Google Sheet แล้ว' : 'ล้างการเชื่อมต่อ — ใช้กระดานในเครื่อง'); showSplash('ranking'); } break; }
     case 'spMusic': AudioSys.toggle(); updateMusicBtn(); showSplash('sound'); break;
     case 'spVol': AudioSys.setVolume(+d.v); showSplash('sound'); break;
     case 'spUi': setUiSize(d.v); showSplash('sound'); break;
@@ -1391,6 +1427,12 @@ function showConfirm(msg, onYes, opts) {
 function showSeasonEnd() {
   const s = state, R = s.finalReport;
   if (!R) { settleSeason(s); return showSeasonEnd(); }
+  /* บันทึกคะแนนลงกระดานอันดับ (ครั้งเดียวต่อฤดู) */
+  if (!s._scoreLogged && typeof Leaderboard !== 'undefined') {
+    s._scoreLogged = true;
+    Leaderboard.submit({ name: (s.player && s.player.name) || 'ผู้จัดการ', score: R.total, grade: R.grade,
+      profit: R.profit, cane: R.caneTotal, sugar: R.sugarTotal, days: R.days });
+  }
   const K = R.kpi, T = s.totals;
   const SC = SCORE_SPEC.map(sp => [sp.icon + ' ' + sp.name, sp.key, sp.w]);
   const bar = (name, v, w) => `<div class="sc-row"><span>${name} <small style="color:#c9a94a">(นน.${w})</small></span><div class="sc-bar"><i style="width:${v.toFixed(0)}%;background:${v >= 70 ? '#4cd47a' : v >= 45 ? '#ffb547' : '#ff5c5c'}"></i></div><b>${Math.round(v / 100 * w)}/${w}</b></div>`;
