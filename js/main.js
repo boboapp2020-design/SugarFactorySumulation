@@ -472,11 +472,11 @@ function onClick(e) {
     }
     case 'over': setOverdrive(state, d.id, +d.v); renderDrawer(); renderMarkers(); break;
     case 'quickRepair': if (quickRepair(state, d.id)) { AudioSys.click(); renderDrawer(); renderMarkers(); } break;
-    case 'repay': { const amt = d.v === 'all' ? state.cash : +d.v; if (repayLoan(state, amt) > 0) AudioSys.coin(); if (UI._bankOpen) showBankModal(); renderDrawer(); saveGame(); break; }
+    case 'repay': { const amt = d.v === 'all' ? state.cash : +d.v; if (repayLoan(state, amt) > 0) AudioSys.coin(); if (UI._bankOpen) showBankModal(); renderDrawer(); renderLive(); saveGame(); break; }
     case 'openBank': { UI._bankOpen = true; AudioSys.click(); showBankModal(); break; }
     case 'bankType': UI.bankType = d.v; showBankModal(); break;
     case 'bankAmt': UI.bankAmt = +d.v; showBankModal(); break;
-    case 'bankBorrow': { const got = borrow(state, UI.bankAmt, { type: UI.bankType }); if (got > 0) { AudioSys.coin(); showBankModal(); renderDrawer(); saveGame(); } break; }
+    case 'bankBorrow': { const got = borrow(state, UI.bankAmt, { type: UI.bankType }); if (got > 0) { AudioSys.coin(); showBankModal(); renderDrawer(); renderLive(); saveGame(); } break; }
     case 'closeModalBtn': UI._bankOpen = false; closeModal(); break;
     case 'emerChoice': { const before = state.emergency && state.emergency.choice; chooseEmergency(state, +d.i); if (state.emergency === null || state.emergency.choice !== before) { closeModal(); setSpeed(UI.resumeSpeed || 1); } renderStatic(); break; }
     case 'emerShow': if (state.emergency) showEmergencyModal(); else if (state.decisions[0]) { UI.resumeSpeed = state.speed || 1; setSpeed(0); showDecisionModal(state.decisions[0]); } break;
@@ -717,8 +717,8 @@ function renderHUD() {
   document.getElementById('hudChips').innerHTML = `
     <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">${TR('วันที่')} <b>${s.day} / ${CONFIG.seasonDays}</b></div>
       <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? TR('🧽 ล้างเครื่อง') : s.started ? `${TR('หีบ')} ${s.crushDaysDone}/${CONFIG.crushDays}` : TR('ยังไม่เปิดหีบ')} · ${clockStr(s.dayProgress)}</div></div></div>
-    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · ${TR('หนี้')} ฿${fmtM(s.loan)}` : ''}</div>
-      <div class="val ${s.loan > 0 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
+    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · <span class="dn">${TR('หนี้')} ฿${fmtM(s.loan)}</span>` : ''}</div>
+      <div class="val ${s.cash < 3_000_000 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
     <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${TR('น้ำตาลวันนี้')}</div>
       <div class="val">${fmt(t.sugar, 0)} <small>${TR('ตัน')}</small></div></div></div>
     <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">${TR('ไฟฟ้า')}</div>
