@@ -221,6 +221,7 @@ function showSplash(pane) {
       <button class="sp-lang" data-action="spNav" data-v="lang">🌐 ${LANG === 'en' ? 'EN' : 'ไทย'} ▾</button>
     </header>
     <div class="sp-loginbox pane-${UI.spPane}">${splashPane(UI.spPane, saved, name)}</div>`;
+  translateBlocks(sp); translateDOM(sp);
   sp.classList.remove('hidden', 'fade');
   setTimeout(() => { const inp = document.getElementById('playerName'); if (inp && !name) inp.focus(); }, 80);
   sp.onkeydown = e => { if (e.key === 'Enter' && UI.spPane === 'home') { const b = sp.querySelector('.sp-btn'); if (b) b.click(); } };
@@ -234,7 +235,7 @@ function showSplash(pane) {
 
 function splashPane(pane, saved, name) {
   if (pane === 'manual') return `
-    <div class="sp-head"><h2>📖 คู่มือผู้จัดการโรงงาน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-head"><h2>📖 ${TR('คู่มือผู้จัดการโรงงาน')}</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
       <h3>1 · เป้าหมาย</h3>
       <p>คุณมีเวลา <b>130 วัน</b> แบ่งเป็นวันหีบ 120 วัน และโควตาวันหยุดล้างเครื่อง 10 วัน (จะหยุดวันไหนก็ได้)
@@ -268,25 +269,25 @@ function splashPane(pane, saved, name) {
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เข้าใจแล้ว</button></div>`;
 
   if (pane === 'depts') return `
-    <div class="sp-head"><h2>🏭 18 แผนกในโรงงาน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-head"><h2>🏭 ${TR('18 แผนกในโรงงาน')}</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
       <p>โรงงานมี <b>18 แผนก</b> ที่ต้องบริหารและอัปเกรดเป็นดาว — สายวัตถุดิบต้องสมดุลกัน เครื่องจักรมีค่าพลังที่ลดลงเรื่อย ๆ ทีมสนับสนุนช่วยลดความเสี่ยงและเพิ่มรายได้</p>
       ${Object.keys(DEPT_GROUPS).map(g => `
         <h3>${TR(DEPT_GROUPS[g].name)}</h3>
-        <p class="sp-note" style="margin:2px 0 6px">${DEPT_GROUPS[g].tip}</p>
+        <p class="sp-note" style="margin:2px 0 6px">${TR(DEPT_GROUPS[g].tip)}</p>
         ${DEPTS.filter(d => d.group === g).map(d => `
           <div class="sp-deptrow"><span class="sp-dept-ic">${d.icon}</span>
-            <div><b>${d.no ? d.no + '. ' : ''}${TR(d.name)}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> เต็ม ${d.maxStar} ดาว</small></span>
-              <div>${d.role}</div></div></div>`).join('')}`).join('')}
+            <div><b>${d.no ? d.no + '. ' : ''}${TR(d.name)}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> ${TR('เต็ม')} ${d.maxStar} ${TR('ดาว')}</small></span>
+              <div>${TR(d.role)}</div></div></div>`).join('')}`).join('')}
     </div>
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เข้าใจแล้ว</button></div>`;
 
   if (pane === 'scoring') return `
-    <div class="sp-head"><h2>🏅 การวัดผล 8 ด้าน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-head"><h2>🏅 ${TR('การวัดผล 8 ด้าน')}</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
       <p>ตอนจบฤดู (130 วัน) เกมให้เกรด <b>S–F</b> จาก <b>คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000 แต้ม</b> (สำหรับระบบ Ranking แข่งขัน) — เรียงตามความสำคัญ:</p>
       ${SCORE_SPEC.map((s, i) => `<div class="sp-deptrow"><span class="sp-dept-ic">${s.icon}</span>
-        <div><b>${i + 1}. ${TR(s.name)}</b> <small style="color:var(--gold-2)">น้ำหนัก ${s.w} แต้ม</small>${s.lower ? ' <small>(ยิ่งน้อยยิ่งดี)</small>' : ''}<div>${s.tip}</div></div></div>`).join('')}
+        <div><b>${i + 1}. ${TR(s.name)}</b> <small style="color:var(--gold-2)">${TR('น้ำหนัก')} ${s.w} ${TR('แต้ม')}</small>${s.lower ? ` <small>${TR('(ยิ่งน้อยยิ่งดี)')}</small>` : ''}<div>${TR(s.tip)}</div></div></div>`).join('')}
       <h3>เกณฑ์เกรด (คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000)</h3>
       <div class="sp-grades">
         ${[['S', '945+', '#ffe08a'], ['A+', '890–944', '#a8f0b0'], ['A', '810–889', '#7be08a'], ['B+', '750–809', '#9ad0ff'], ['B', '670–749', '#5cb3ff'], ['C+', '610–669', '#ffd07a'], ['C', '540–609', '#ffb547'], ['F', '< 540', '#ff6b6b']]
@@ -300,46 +301,46 @@ function splashPane(pane, saved, name) {
     setTimeout(renderLeaderboard, 30);
     const shared = Leaderboard.isShared();
     return `
-    <div class="sp-head"><h2>🏆 อันดับผู้จัดการโรงงาน</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-head"><h2>🏆 ${TR('อันดับผู้จัดการโรงงาน')}</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
-      <p>อันดับจาก <b>คะแนนรวม (เต็ม 1,000)</b> ตอนปิดฤดูกาล · ${shared ? '🌐 กระดานส่วนกลาง — แข่งกับทุกคนที่เล่น' : '💾 บันทึกในเครื่องนี้'}</p>
-      <div id="lbList" class="lb-list"><div class="tip">กำลังโหลด…</div></div>
+      <p>${TR('อันดับจาก')} <b>${TR('คะแนนรวม (เต็ม 1,000)')}</b> ${TR('ตอนปิดฤดูกาล')} · ${shared ? TR('🌐 กระดานส่วนกลาง — แข่งกับทุกคนที่เล่น') : TR('💾 บันทึกในเครื่องนี้')}</p>
+      <div id="lbList" class="lb-list"><div class="tip">${TR('กำลังโหลด…')}</div></div>
     </div>
-    <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">กลับหน้าแรก</button></div>`;
+    <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">${TR('กลับหน้าแรก')}</button></div>`;
   }
 
   if (pane === 'sound') return `
-    <div class="sp-head"><h2>🔊 ตั้งค่าเสียง</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
+    <div class="sp-head"><h2>🔊 ${TR('ตั้งค่าเสียง')}</h2><button class="sp-x" data-action="spPane" data-v="home">✕</button></div>
     <div class="sp-scroll">
-      <div class="sp-row"><span>เพลงประกอบ</span>
-        <button class="sp-toggle ${AudioSys.enabled ? 'on' : ''}" data-action="spMusic">${AudioSys.enabled ? 'เปิด' : 'ปิด'}</button></div>
-      <div class="sp-row"><span>ระดับเสียง</span>
+      <div class="sp-row"><span>${TR('เพลงประกอบ')}</span>
+        <button class="sp-toggle ${AudioSys.enabled ? 'on' : ''}" data-action="spMusic">${AudioSys.enabled ? TR('เปิด') : TR('ปิด')}</button></div>
+      <div class="sp-row"><span>${TR('ระดับเสียง')}</span>
         <span class="sp-vol">${[0, 0.2, 0.5, 0.8, 1].map(v => `<button class="sp-vbtn ${Math.abs(AudioSys.volume - v) < 0.01 ? 'on' : ''}" data-action="spVol" data-v="${v}">${Math.round(v * 100)}%</button>`).join('')}</span></div>
-      <div class="sp-row"><span>ขนาดตัวหนังสือ</span>
-        <span class="sp-vol">${[['s', 'ปกติ'], ['m', 'ใหญ่'], ['l', 'ใหญ่มาก']].map(([v, t]) => `<button class="sp-vbtn ${(lsGet('sfm_ui') || 'm') === v ? 'on' : ''}" data-action="spUi" data-v="${v}">${t}</button>`).join('')}</span></div>
-      <p class="sp-note">เพลงสร้างสดด้วย Web Audio ไม่มีไฟล์เสียง · เมื่อกดหยุดเวลาในเกม เสียงทั้งหมดจะเงียบสนิท</p>
+      <div class="sp-row"><span>${TR('ขนาดตัวหนังสือ')}</span>
+        <span class="sp-vol">${[['s', 'ปกติ'], ['m', 'ใหญ่'], ['l', 'ใหญ่มาก']].map(([v, t]) => `<button class="sp-vbtn ${(lsGet('sfm_ui') || 'm') === v ? 'on' : ''}" data-action="spUi" data-v="${v}">${TR(t)}</button>`).join('')}</span></div>
+      <p class="sp-note">${TR('เพลงสร้างสดด้วย Web Audio ไม่มีไฟล์เสียง · เมื่อกดหยุดเวลาในเกม เสียงทั้งหมดจะเงียบสนิท')}</p>
     </div>
-    <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เสร็จสิ้น</button></div>`;
+    <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">${TR('เสร็จสิ้น')}</button></div>`;
 
   return `
     <div class="sp-badge ${saved ? 'save' : 'new'}">🌱 ${saved
-      ? `เปิดฤดูกาลหีบ · วันที่ ${state.day}/${CONFIG.seasonDays} · เหลืออีก ${Math.max(0, CONFIG.seasonDays - state.day + 1)} วัน`
-      : `ฤดูกาลใหม่ · 130 วัน · 18 แผนก · ทุน ฿50 ล้าน`}</div>
-    <h2 class="sp-welcome">${saved ? 'ยินดีต้อนรับกลับ<br><span>สู่โรงงานของคุณ</span>' : 'ลงชื่อเข้าโรงงาน<br><span>บริหารในแบบของคุณ</span>'}</h2>
-    <p class="sp-cardsub">เข้าสู่ระบบเพื่อจัดการโรงงานน้ำตาล</p>
+      ? `${TR('เปิดฤดูกาลหีบ')} · ${TR('วันที่')} ${state.day}/${CONFIG.seasonDays} · ${TR('เหลืออีก')} ${Math.max(0, CONFIG.seasonDays - state.day + 1)} ${TR('วัน')}`
+      : TR(`ฤดูกาลใหม่ · 130 วัน · 18 แผนก · ทุน ฿50 ล้าน`)}</div>
+    <h2 class="sp-welcome">${saved ? `${TR('ยินดีต้อนรับกลับ')}<br><span>${TR('สู่โรงงานของคุณ')}</span>` : `${TR('ลงชื่อเข้าโรงงาน')}<br><span>${TR('บริหารในแบบของคุณ')}</span>`}</h2>
+    <p class="sp-cardsub">${TR('เข้าสู่ระบบเพื่อจัดการโรงงานน้ำตาล')}</p>
     <div class="sp-field"><span class="sp-fico">👤</span>
-      <input class="sp-input" id="playerName" maxlength="24" placeholder="ชื่อผู้จัดการโรงงาน" value="${escapeHtml(name)}" autocomplete="off"></div>
+      <input class="sp-input" id="playerName" maxlength="24" placeholder="${TR('ชื่อผู้จัดการโรงงาน')}" value="${escapeHtml(name)}" autocomplete="off"></div>
     <div class="sp-actions">
-      ${saved ? `<button class="sp-btn" data-action="splashContinue">▶ เล่นต่อ · วันที่ ${state.day}</button>
-                 <button class="sp-btn alt" data-action="splashNew">เริ่มฤดูใหม่ (ล้างเกมเดิม)</button>`
-              : `<button class="sp-btn" data-action="splashNew">🏭 เริ่มบริหารโรงงาน</button>`}
+      ${saved ? `<button class="sp-btn" data-action="splashContinue">▶ ${TR('เล่นต่อ')} · ${TR('วันที่')} ${state.day}</button>
+                 <button class="sp-btn alt" data-action="splashNew">${TR('เริ่มฤดูใหม่ (ล้างเกมเดิม)')}</button>`
+              : `<button class="sp-btn" data-action="splashNew">${TR('🏭 เริ่มบริหารโรงงาน')}</button>`}
     </div>
-    <div class="sp-or"><span>หรือ</span></div>
+    <div class="sp-or"><span>${TR('หรือ')}</span></div>
     <div class="sp-links">
-      <button class="sp-link" data-action="spPane" data-v="manual">📖 คู่มือการเล่น</button>
-      <button class="sp-link" data-action="spPane" data-v="sound">⚙️ ตั้งค่าเสียง</button>
+      <button class="sp-link" data-action="spPane" data-v="manual">${TR('📖 คู่มือการเล่น')}</button>
+      <button class="sp-link" data-action="spPane" data-v="sound">${TR('⚙️ ตั้งค่าเสียง')}</button>
     </div>
-    <div class="sp-foot">เริ่มต้นทุกแผนกที่ 0 ดาว · วันหีบยังไม่เดินจนกว่าจะกด “เริ่มหีบ” — ใช้เวลาปรับปรุงและเร่งเครื่องยิ่งขึ้นได้</div>`;
+    <div class="sp-foot">${TR('เริ่มต้นทุกแผนกที่ 0 ดาว · วันหีบยังไม่เดินจนกว่าจะกด “เริ่มหีบ” — ใช้เวลาปรับปรุงและเร่งเครื่องยิ่งขึ้นได้')}</div>`;
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
 function readPlayerName() {
@@ -617,9 +618,9 @@ function updatePlayBtn() {
   const paused = !state.started || state.speed === 0;
   bt.classList.toggle('paused', paused);
   if (!ic || !lb) return;
-  if (!state.started) { ic.textContent = '🚩'; lb.textContent = 'เริ่มหีบ'; }
-  else if (state.speed === 0) { ic.textContent = '▶'; lb.textContent = 'เดินต่อ'; }
-  else { ic.textContent = '⏸'; lb.textContent = 'หยุด · ' + state.speed + 'x'; }
+  if (!state.started) { ic.textContent = '🚩'; lb.textContent = TR('เริ่มหีบ'); }
+  else if (state.speed === 0) { ic.textContent = '▶'; lb.textContent = TR('เดินต่อ'); }
+  else { ic.textContent = '⏸'; lb.textContent = TR('หยุด') + ' · ' + state.speed + 'x'; }
   document.querySelectorAll('#timeCtrl .sb-row button').forEach(b => b.classList.toggle('active', +b.dataset.v === state.speed));
 }
 
@@ -627,10 +628,10 @@ function updatePlayBtn() {
 function updateDayLenTxt() {
   const el = document.getElementById('btnDayTxt'); if (!el) return;
   const sp = state ? state.speed : 1;
-  if (!sp) { el.textContent = '1 วันหีบ = หยุดอยู่'; return; }
+  if (!sp) { el.textContent = TR('1 วันหีบ =') + ' ' + TR('หยุดอยู่'); return; }
   const sec = CONFIG.dayLengthSec / sp;
   const num = n => n.toFixed(1).replace(/\.0$/, '');
-  el.textContent = '1 วันหีบ = ' + (sec >= 90 ? num(sec / 60) + ' นาที' : (sec >= 10 ? Math.round(sec) : num(sec)) + ' วิ');
+  el.textContent = TR('1 วันหีบ =') + ' ' + (sec >= 90 ? num(sec / 60) + ' ' + TR('นาที') : (sec >= 10 ? Math.round(sec) : num(sec)) + ' ' + TR('วิ'));
 }
 
 function openTab(tab) { UI.tab = tab; UI.station = null; renderDrawer(); }
@@ -714,12 +715,12 @@ function renderHUD() {
   const mw = (t.hours > 0 ? t.powerExport / t.hours / 1000 : 0);
   /* 6 ช่อง: วันที่/วันหีบ · เงินทุน+หนี้ · น้ำตาลวันนี้ · ไฟฟ้า · ลูกค้า · พนักงาน */
   document.getElementById('hudChips').innerHTML = `
-    <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">วันที่ <b>${s.day} / ${CONFIG.seasonDays}</b></div>
-      <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? '🧽 ล้างเครื่อง' : s.started ? `หีบ ${s.crushDaysDone}/${CONFIG.crushDays}` : 'ยังไม่เปิดหีบ'} · ${clockStr(s.dayProgress)}</div></div></div>
+    <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">${TR('วันที่')} <b>${s.day} / ${CONFIG.seasonDays}</b></div>
+      <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? TR('🧽 ล้างเครื่อง') : s.started ? `${TR('หีบ')} ${s.crushDaysDone}/${CONFIG.crushDays}` : TR('ยังไม่เปิดหีบ')} · ${clockStr(s.dayProgress)}</div></div></div>
     <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
       <div class="val ${s.loan > 0 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
     <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${TR('น้ำตาลวันนี้')}</div>
-      <div class="val">${fmt(t.sugar, 0)} <small>ตัน</small></div></div></div>
+      <div class="val">${fmt(t.sugar, 0)} <small>${TR('ตัน')}</small></div></div></div>
     <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">${TR('ไฟฟ้า')}</div>
       <div class="val">${mw.toFixed(1)} MW<span class="meter"><i style="width:${Math.min(100, mw * 6)}%"></i></span></div></div></div>
     <div class="chip" style="width:150px" title="ส่งตรงเวลาและคุณภาพคงที่ · สำเร็จ ${s.totals.ordersDone} / พลาด ${s.totals.ordersFailed} · ข้อร้องเรียน ${s.complaints.customer}"><span class="ic" style="background:#e8590c">${s.custSat >= 70 ? '😊' : s.custSat >= 50 ? '😐' : '😟'}</span><div><div class="lbl">${TR('ลูกค้า')}</div>
@@ -731,7 +732,7 @@ function renderHUD() {
     <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">${TR('ความปลอดภัย')}</div>
       <div class="val ${(s.safety ?? 90) < 50 ? 'dn' : ''}">${Math.round(s.safety ?? 90)}%</div></div></div>`;
   const l3 = document.querySelector('#hud .logo .l3');
-  if (l3 && s.player && s.player.name) l3.innerHTML = `ผู้จัดการ <b>${escapeHtml(s.player.name)}</b>${s.started ? '' : ' · ยังไม่เปิดหีบ'}`;
+  if (l3 && s.player && s.player.name) l3.innerHTML = `${TR('ผู้จัดการ')} <b>${escapeHtml(s.player.name)}</b>${s.started ? '' : ' · ' + TR('ยังไม่เปิดหีบ')}`;
   updatePlayBtn();
   const bad = (s.hints || []).filter(x => x.lvl === 'bad' || x.lvl === 'warn').length;
   const badge = document.getElementById('hintBadge'); badge.textContent = bad; badge.classList.toggle('show', bad > 0);
@@ -744,7 +745,7 @@ function questProgress(q) {
   const r = q.check(state);
   const pct = r.lower ? (r.cur <= r.target ? 100 : Math.max(0, Math.min(100, (1 - (r.cur - r.target) / Math.max(1, r.target)) * 100))) : Math.min(100, r.cur / r.target * 100);
   const fv = v => r.money ? '฿' + fmtM(v) : fmt(v, r.decimals || 0);
-  return { r, pct, text: `${fv(r.cur)} / ${fv(r.target)} ${r.unit}` };
+  return { r, pct, text: `${fv(r.cur)} / ${fv(r.target)} ${TR(r.unit)}` };
 }
 function renderMissions() {
   const s = state, qs = activeQuests(s);
@@ -757,6 +758,7 @@ function renderMissions() {
   /* ภารกิจรายวัน */
   const daily = (s.daily && s.daily.tasks) || [];
   if (daily.length) document.getElementById('missionList').innerHTML += `<li class="daily"><div class="q-head"><span>📅 ${TR('ภารกิจวันนี้')}</span></div>${daily.map(t => `<div class="d-row ${t.done ? 'done' : ''}"><span class="cb ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</span><span class="d-txt">${TR(t.text)}</span><b>+฿${fmtM(t.reward)}</b></div>`).join('')}</li>`;
+  translateDOM(document.getElementById('missionList'));
   const sum = document.querySelector('#missions h3 .sum');
   if (sum) sum.textContent = `${s.questsDone.length}/${QUESTS.length}`;
 }
@@ -1018,6 +1020,7 @@ function renderDrawer() {
   const body = document.getElementById('drawerBody');
   const sc = body.scrollTop;
   body.innerHTML = drawerHTML();
+  translateDOM(body);
   body.scrollTop = sc;
   if (UI.tab === 'overview' || UI.tab === 'finance' || UI.tab === 'reports') drawCharts();
 }
@@ -1029,6 +1032,7 @@ function renderDrawerLive() {
   if (UI.tab === 'upgrades' || UI.tab === 'settings') return;
   const sc = body.scrollTop;
   body.innerHTML = drawerHTML();
+  translateDOM(body);
   body.scrollTop = sc;
   if (UI.tab === 'overview' || UI.tab === 'finance' || UI.tab === 'reports') drawCharts();
 }
@@ -1412,7 +1416,7 @@ function shortNum(v) {
 }
 
 /* ============================ modal ============================ */
-function showModal(html, cls) { const c = document.getElementById('modalCard'); c.innerHTML = html; c.classList.toggle('light', cls === 'light'); c.classList.toggle('big', cls === 'big'); document.getElementById('modal').classList.remove('hidden'); }
+function showModal(html, cls) { const c = document.getElementById('modalCard'); c.innerHTML = html; c.classList.toggle('light', cls === 'light'); c.classList.toggle('big', cls === 'big'); translateBlocks(c); translateDOM(c); document.getElementById('modal').classList.remove('hidden'); }
 function closeModal() { document.getElementById('modal').classList.add('hidden'); document.getElementById('modalCard').classList.remove('light', 'big'); }
 
 /* กล่องยืนยันกลางจอ (แทน confirm() ของเบราว์เซอร์ ที่เด้งมุมบน) */
@@ -1522,10 +1526,10 @@ function showTutorial() { tutorialStep(0); }
 function tutorialStep(i) {
   if (i >= TUT.length) { lsSet('sfm_tut_done_v7', '1'); closeModal(); if (!state.started) showPrepBrief(); return; }
   const s = TUT[i];
-  showModal(`<div class="tut-step">คู่มือ ${i + 1}/${TUT.length}</div><h2>${s.t}</h2><p>${s.b}</p>
-    <div class="modal-actions">${i > 0 ? `<button class="btn" data-action="tutNext" data-step="${i - 1}">ย้อนกลับ</button>` : ''}
-    <button class="btn" data-action="tutNext" data-step="${TUT.length}">ข้าม</button>
-    <button class="btn primary" data-action="tutNext" data-step="${i + 1}">${s.a}</button></div>`);
+  showModal(`<div class="tut-step">${TR('คู่มือ')} ${i + 1}/${TUT.length}</div><h2>${TR(s.t)}</h2><p>${s.b}</p>
+    <div class="modal-actions">${i > 0 ? `<button class="btn" data-action="tutNext" data-step="${i - 1}">${TR('ย้อนกลับ')}</button>` : ''}
+    <button class="btn" data-action="tutNext" data-step="${TUT.length}">${TR('ข้าม')}</button>
+    <button class="btn primary" data-action="tutNext" data-step="${i + 1}">${TR(s.a)}</button></div>`);
 }
 
 /* ============================ toast ============================ */

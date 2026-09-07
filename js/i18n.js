@@ -5,12 +5,41 @@
    Phase 1: เมนู · ชื่อ 18 แผนก · ป้าย HUD · ชื่อมิติคะแนน · ปุ่มหลัก · หน้าแรก
    ===================================================================== */
 let LANG = 'th';
-try { LANG = (lsGet('sfm_lang') === 'en') ? 'en' : 'th'; } catch (e) {}
+/* NB: read localStorage directly — lsGet() is defined later in main.js and is not
+   available yet when this script runs, so using it here would always fall back to 'th'. */
+try { LANG = (localStorage.getItem('sfm_lang') === 'en') ? 'en' : 'th'; } catch (e) {}
 
-function setLang(l) { LANG = (l === 'en') ? 'en' : 'th'; try { lsSet('sfm_lang', LANG); } catch (e) {} }
+function setLang(l) { LANG = (l === 'en') ? 'en' : 'th'; try { localStorage.setItem('sfm_lang', LANG); } catch (e) {} }
 
 /* แปลข้อความไทย 1 คำ/วลี → อังกฤษ (ถ้าไม่มีในดิกก็คืนไทยเดิม) */
 function TR(s) { return (LANG === 'en' && DICT_EN[s]) ? DICT_EN[s] : s; }
+
+/* แปลระดับบล็อก (ย่อหน้า/หัวข้อที่มี <b> ปน) — เทียบ innerHTML แบบรวบช่องว่างกับ DICT_BLOCK */
+const DICT_BLOCK = {};
+function translateBlocks(root) {
+  if (LANG !== 'en' || !root || typeof root.querySelectorAll !== 'function') return;
+  try {
+    root.querySelectorAll('p, h3, li, small, .sp-note, .up-diff').forEach(el => {
+      const norm = el.innerHTML.replace(/\s+/g, ' ').trim();
+      if (DICT_BLOCK[norm]) el.innerHTML = DICT_BLOCK[norm];
+    });
+  } catch (e) {}
+}
+
+/* กวาดแปลทั้ง DOM หลัง render: text node ที่ (ตัด whitespace แล้ว) ตรงกับคีย์ในดิก จะถูกแปล
+   ปลอดภัย/idempotent — ข้อความอังกฤษไม่ตรงกับคีย์ไทย จึงไม่แปลซ้ำ */
+function translateDOM(root) {
+  if (LANG !== 'en' || !root || typeof document === 'undefined') return;
+  try {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const nodes = []; let n;
+    while ((n = w.nextNode())) nodes.push(n);
+    for (const node of nodes) {
+      const v = node.nodeValue, k = v.trim();
+      if (k.length > 0 && DICT_EN[k] && /[ก-๙]/.test(k)) node.nodeValue = v.replace(k, DICT_EN[k]);
+    }
+  } catch (e) {}
+}
 
 const DICT_EN = {
   /* --- เมนูนำทางหน้าแรก --- */

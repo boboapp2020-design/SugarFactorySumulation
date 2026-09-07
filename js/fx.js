@@ -320,8 +320,9 @@ const FX = {
         }
       }
       if (opt.label) {
-        el('rect', { x: x + w / 2 - opt.label.length * 4.2 - 8, y: top + 6, width: opt.label.length * 8.4 + 16, height: 16, rx: 4, fill: '#1d2731', opacity: .75 }, g);
-        el('text', { x: x + w / 2, y: top + 18, 'text-anchor': 'middle', 'font-family': 'Kanit, sans-serif', 'font-size': 11, fill: '#fff' }, g).textContent = opt.label;
+        const lb = TR(opt.label);
+        el('rect', { x: x + w / 2 - lb.length * 4.2 - 8, y: top + 6, width: lb.length * 8.4 + 16, height: 16, rx: 4, fill: '#1d2731', opacity: .75 }, g);
+        el('text', { x: x + w / 2, y: top + 18, 'text-anchor': 'middle', 'font-family': 'Kanit, sans-serif', 'font-size': 11, fill: '#fff' }, g).textContent = lb;
       }
       el('rect', { x: x - 2, y: yb - 5, width: w + 4, height: 6, rx: 2, fill: '#5d6870', opacity: .55 }, g);
       return g;
@@ -431,6 +432,7 @@ const FX = {
 
     /* ป้ายชื่อบนพื้นหน้าอุปกรณ์ */
     const floorLabel = (x, y, txt) => {
+      txt = TR(txt);
       el('rect', { x: x - txt.length * 4.2 - 8, y: y - 10, width: txt.length * 8.4 + 16, height: 16, rx: 4, fill: '#1d2731', opacity: .7 });
       el('text', { x, y: y + 2, 'text-anchor': 'middle', 'font-family': 'Kanit, sans-serif', 'font-size': 11, fill: '#fff' }).textContent = txt;
     };
@@ -595,7 +597,7 @@ const FX = {
     const roofTank = (x, y, r = 12) => { const g = el('g', shSm); el('ellipse', { cx: x, cy: y + r * 1.6, rx: r * 0.9, ry: r * 0.4, fill: '#0d2030', opacity: .22 }, g); for (let k = 0; k < 4; k++) el('rect', { x: x - r + 2 + k * (r * 2 - 4) / 3, y: y + r * 0.5, width: 2, height: r * 1.1, fill: '#7c868e' }, g); el('ellipse', { cx: x, cy: y, rx: r, ry: r * 0.55, fill: '#b9c2c9' }, g); el('rect', { x: x - r, y: y, width: r * 2, height: r * 0.9, fill: '#9aa4ac' }, g); el('ellipse', { cx: x, cy: y + r * 0.9, rx: r, ry: r * 0.5, fill: '#8a949c' }, g); el('ellipse', { cx: x, cy: y, rx: r, ry: r * 0.55, fill: 'none', stroke: '#d6dde2', 'stroke-width': 1, opacity: .5 }, g); return g; };
     const wallLadder = (x, y, h = 40) => { const g = el('g', {}); el('rect', { x: x - 5, y, width: 3, height: h, rx: 1, fill: '#8a939b' }, g); el('rect', { x: x + 2, y, width: 3, height: h, rx: 1, fill: '#8a939b' }, g); for (let k = 1; k * 7 < h; k++) el('line', { x1: x - 4, y1: y + k * 7, x2: x + 4, y2: y + k * 7, stroke: '#6f7982', 'stroke-width': 1.6 }, g); return g; };
     const acUnit = (x, y) => { const g = el('g', shSm); el('rect', { x, y, width: 22, height: 15, rx: 2, fill: '#c3cad0', stroke: '#8b949b', 'stroke-width': 1 }, g); el('circle', { cx: x + 11, cy: y + 7.5, r: 5.5, fill: 'none', stroke: '#7d868d', 'stroke-width': 1.4 }, g); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + 0.5; el('line', { x1: x + 11, y1: y + 7.5, x2: x + 11 + Math.cos(a) * 5, y2: y + 7.5 + Math.sin(a) * 5, stroke: '#9aa2a8', 'stroke-width': 1.3 }, g); } return g; };
-    const signboard = (x, y, txt, c = '#2f6fb0') => { const g = el('g', shSm); el('rect', { x: x - 1.5, y: y, width: 3, height: 26, fill: '#6f7c86' }, g); el('rect', { x: x - 26, y: y - 15, width: 52, height: 17, rx: 3, fill: c, stroke: '#ffffff', 'stroke-width': 1, 'stroke-opacity': .4 }, g); el('text', { x, y: y - 3, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 700, fill: '#ffffff', 'font-family': 'sans-serif' }, g).textContent = txt; return g; };
+    const signboard = (x, y, txt, c = '#2f6fb0') => { txt = TR(txt); const bw = Math.max(52, txt.length * 6 + 12); const g = el('g', shSm); el('rect', { x: x - 1.5, y: y, width: 3, height: 26, fill: '#6f7c86' }, g); el('rect', { x: x - bw / 2, y: y - 15, width: bw, height: 17, rx: 3, fill: c, stroke: '#ffffff', 'stroke-width': 1, 'stroke-opacity': .4 }, g); el('text', { x, y: y - 3, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 700, fill: '#ffffff', 'font-family': 'sans-serif' }, g).textContent = txt; return g; };
     const guardHouse = (x, y) => { const g = el('g', shSm); el('rect', { x, y, width: 34, height: 30, rx: 3, fill: '#e5d8bf', stroke: '#b7a583', 'stroke-width': 1.5 }, g); el('rect', { x, y: y - 8, width: 34, height: 9, rx: 2, fill: '#c0392b' }, g); el('rect', { x: x + 5, y: y + 5, width: 14, height: 13, rx: 1.5, fill: '#9fd0ef', stroke: '#7d868d', 'stroke-width': 1 }, g); el('rect', { x: x + 23, y: y + 4, width: 7, height: 22, rx: 1, fill: '#7a8590' }, g); return g; };
     roofTank(560, 320, 13); roofTank(1088, 236, 11); roofTank(880, 700, 12); roofTank(1300, 560, 10);
     wallLadder(452, 356, 44); wallLadder(1128, 300, 40); wallLadder(806, 640, 42);

@@ -155,3 +155,8 @@ Object.assign(DICT_EN, {
   "🤝 ทีมสนับสนุน (ทีม 13-18)": "🤝 Support Teams (Teams 13-18)",
   "ซ่อมบำรุง ขาย ฉุกเฉิน บุคคล คุณภาพ บ่อบำบัด": "Maintenance, sales, emergency, HR, quality, treatment ponds",
 });
+
+/* --- role fix (evaporator) --- */
+Object.assign(DICT_EN, {
+  "ระเหยน้ำออกจากน้ำอ้อยใส ทำให้เข้มข้นเป็นน้ำเชื่อม": "Evaporate water from clear juice to concentrate it into syrup",
+});

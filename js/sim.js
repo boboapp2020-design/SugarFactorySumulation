@@ -1666,7 +1666,7 @@ function fmt(n, d = 0) {
 function fmtM(n) {
   if (!isFinite(n)) return '-';
   const a = Math.abs(n);
-  if (a >= 1_000_000) return (n / 1_000_000).toFixed(2) + ' ล้าน';
+  if (a >= 1_000_000) return (n / 1_000_000).toFixed(2) + (typeof LANG !== 'undefined' && LANG === 'en' ? 'M' : ' ล้าน');
   if (a >= 1_000) return (n / 1_000).toFixed(0) + 'k';
   return fmt(n);
 }
