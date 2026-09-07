@@ -699,7 +699,9 @@ function renderHUD() {
     <div class="chip" style="width:150px" title="ขวัญกำลังใจพนักงาน · ภาระเร่งเครื่อง ${(overdriveLoad(s) * 100).toFixed(0)}% · ข้อร้องเรียนแรงงาน ${s.complaints.labour}"><span class="ic" style="background:#7048e8">${s.staffSat >= 70 ? '💪' : s.staffSat >= 50 ? '😓' : '😡'}</span><div><div class="lbl">พนักงาน</div>
       <div class="val ${s.staffSat < 50 ? 'dn' : ''}">${Math.round(s.staffSat)}%</div></div></div>
     <div class="chip" style="width:150px" title="ความพึงพอใจชาวไร่ · ราคารับซื้อ ลดคิวรอ ไม่เสียอ้อยให้คู่แข่ง · มีผลต่อปริมาณอ้อยเข้าโรงงานและคะแนน"><span class="ic" style="background:#2f9e44">${s.growerTrust >= 70 ? '🌾' : s.growerTrust >= 50 ? '😐' : '😠'}</span><div><div class="lbl">ชาวไร่</div>
-      <div class="val ${s.growerTrust < 50 ? 'dn' : ''}">${Math.round(s.growerTrust)}%</div></div></div>`;
+      <div class="val ${s.growerTrust < 50 ? 'dn' : ''}">${Math.round(s.growerTrust)}%</div></div></div>
+    <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">ความปลอดภัย</div>
+      <div class="val ${(s.safety ?? 90) < 50 ? 'dn' : ''}">${Math.round(s.safety ?? 90)}%</div></div></div>`;
   const l3 = document.querySelector('#hud .logo .l3');
   if (l3 && s.player && s.player.name) l3.innerHTML = `ผู้จัดการ <b>${escapeHtml(s.player.name)}</b>${s.started ? '' : ' · ยังไม่เปิดหีบ'}`;
   updatePlayBtn();

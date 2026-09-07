@@ -650,7 +650,8 @@ function emergencyTick(s, h) {
   const E = s.emergency;
   if (!E) {
     /* สุ่มเกิด (ต่อชั่วโมง) ตามความยากและระดับทีมฉุกเฉิน */
-    const mult = diff(s).emerP * up(s, 'ert', 'ertProb') * modMul(s, 'safety');
+    const safeFac = clamp(1 + (70 - (s.safety ?? 90)) / 60, 0.7, 2.2);   // ปลอดภัยสูง=เกิดเหตุน้อย · ต่ำ=เกิดบ่อยขึ้นถึง 2.2 เท่า
+    const mult = diff(s).emerP * up(s, 'ert', 'ertProb') * modMul(s, 'safety') * safeFac;
     for (const def of EMERGENCIES) {
       if (def.cond && !def.cond(s)) continue;
       const w = (def.weight ? def.weight(s) : 1) * (def.id === 'injury' ? clamp(1.7 - s.staffSat / 100, 0.5, 1.7) : 1);
@@ -672,6 +673,7 @@ function emergencyTick(s, h) {
 function startEmergency(s, def) {
   s.emergency = { id: def.id, name: def.name, icon: def.icon, cause: def.cause, startDay: s.day, elapsedH: 0, deadlineH: def.deadlineH, choice: null, resolveAtH: 0, loss: 0, shown: false, station: null };
   if (def.onStart) def.onStart(s);
+  if (def.id === 'injury' || def.id === 'plant_fire') s.safety = clamp((s.safety ?? 90) - (def.id === 'injury' ? 14 : 8), 0, 100);   // เกิดเหตุ = สถิติความปลอดภัยเสีย
   logMsg(s, `🚨 เหตุฉุกเฉิน: ${def.name} — ${def.cause}`, 'bad');
 }
 function chooseEmergency(s, i, auto = false) {
@@ -700,7 +702,8 @@ function chooseEmergency(s, i, auto = false) {
     if (rnd() > pOk) { rep = opt.failRep; E.result = 'เจรจาไม่สำเร็จ'; s.custSat = clamp(s.custSat - 8, 0, 100); s.complaints.customer++; }
     else E.result = 'เจรจาสำเร็จ';
   }
-  if (opt.riskFine && rnd() < opt.riskFine) { pay(s, opt.fine, 'penalty'); E.result = `ถูกปรับ ฿${fmt(opt.fine)}`; rep -= 4; s.complaints.gov++; }
+  if (opt.riskFine && rnd() < opt.riskFine) { pay(s, opt.fine, 'penalty'); E.result = `ถูกปรับ ฿${fmt(opt.fine)}`; rep -= 4; s.complaints.gov++;
+    if (opt.riskShutdownH && E.station) { s.dept[E.station].downH = Math.max(s.dept[E.station].downH, opt.riskShutdownH); E.result += ` + คำสั่งหยุดเครื่อง ${opt.riskShutdownH} ชม.`; s.safety = clamp((s.safety ?? 90) - 12, 0, 100); } }
   E.rep = rep;
   s.reputation = clamp(s.reputation + rep, 0, 100);
   logMsg(s, `🛠️ ${def.name}: เลือก "${opt.label}"${opt.cost ? ` ฿${fmt(opt.cost)}` : ''}${E.result ? ' — ' + E.result : ''}`, rep >= 0 ? 'info' : 'bad');
@@ -809,7 +812,18 @@ function updateSatisfaction(s, t) {
   let staff = (dStar(s, 'hr') - 2) * 0.18;                     // สวัสดิการจากทีมบุคคล (ดาวสูง=ขวัญดี, ต่ำ=ตก)
   if ((s.todayBreaks || 0) > 0)  staff -= 0.3 * s.todayBreaks; // อุบัติเหตุ/เครื่องพัง = เสี่ยง/เครียด
   if (s.loan > 150_000_000)      staff -= 0.5;                 // บริษัทฝืดเคือง กระทบสวัสดิการ/ขวัญ
+  if ((s.safety ?? 90) < 50)     staff -= 0.4;                 // ที่ทำงานไม่ปลอดภัย = ขวัญตก
   s.staffSat = clamp(s.staffSat + staff, 0, 100);
+
+  /* --- ดัชนีความปลอดภัย: เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี --- */
+  let saf = 0.35;                                              // ฟื้นตัวช้า ๆ เมื่อไม่มีเหตุ (safety program เดินต่อเนื่อง)
+  saf += (dStar(s, 'ert') - 1.5) * 0.4;                        // ทีมตอบสนองเหตุ/จป./ระบบดับเพลิงอัตโนมัติ
+  saf -= overdriveLoad(s) * 1.6;                               // เร่งเครื่องหนัก = พนักงานล้า เสี่ยงพลาด
+  const lowPower = MACHINE_IDS.filter(k => dPower(s, k) < 40).length;
+  saf -= lowPower * 0.5;                                       // เครื่องค่าพลังต่ำ = การ์ด/สภาพไม่พร้อม
+  if (s.staffSat < 50) saf -= 0.4;
+  if ((s.todayBreaks || 0) > 0) saf -= 0.6 * s.todayBreaks;    // เครื่องพัง = เหตุเฉียด (near-miss)
+  s.safety = clamp((s.safety ?? 90) + saf, 0, 100);
 }
 
 function endOfDay(s) {
