@@ -845,6 +845,7 @@ table.rep { font-size: 14px; } table.fin { font-size: 15px; }
   animation: spKen 30s ease-in-out infinite alternate;
   will-change: background-position;
 }
+#splash .sp-bg.en { background-image: url("../assets/Building/hero-en.jpg?v=1"); }
 @keyframes spKen {
   0%   { background-position: left 44%; }
   100% { background-position: left 56%; }

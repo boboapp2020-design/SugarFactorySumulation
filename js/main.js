@@ -206,7 +206,7 @@ function showSplash(pane) {
   const nav = navItems.map(([v, t]) =>
     `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${TR(t)}</button>`).join('');
   sp.innerHTML = `
-    <div class="sp-bg"></div>
+    <div class="sp-bg${LANG === 'en' ? ' en' : ''}"></div>
     <div class="sp-fx" aria-hidden="true">
       <div class="sp-rays"></div>
       <div class="sp-stars">${stars}</div>
