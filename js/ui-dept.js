@@ -347,8 +347,9 @@ function qcCard() {
     <div class="kv"><span class="k">สัญญาณปัญหาคุณภาพ</span><span class="v ${s.qualityIssue > 0.8 ? 'bad' : s.qualityIssue > 0.3 ? 'warn' : 'good'}">${s.qualityIssue.toFixed(1)}</span></div>
     <div class="kv"><span class="k">อ้อยเก่าสุดในลาน</span><span class="v ${oldestAgeH(s) > 24 ? 'bad' : ''}">${oldestAgeH(s).toFixed(0)} ชม.${oldestAgeH(s) > 24 ? ' (เกิด dextran)' : ''}</span></div>
     <div class="kv"><span class="k">pH น้ำอ้อย</span><span class="v ${s.ctrl.pH > 7.6 || s.ctrl.pH < 6.6 ? 'warn' : 'good'}">${s.ctrl.pH.toFixed(1)}</span></div>
+    <div class="kv"><span class="k">สี ICUMSA น้ำตาลที่ผลิต</span><span class="v ${(s.icumsaColor ?? 160) > 150 ? 'bad' : (s.icumsaColor ?? 160) > 100 ? 'warn' : 'good'}">${s.icumsaColor ?? '—'} IU ${(s.icumsaColor ?? 160) <= 45 ? '(เกรดพรีเมียม)' : (s.icumsaColor ?? 160) <= 150 ? '(ผ่าน มอก.56)' : '(สีสูง เสี่ยงถูกปฏิเสธ)'}</span></div>
     <div class="kv"><span class="k">พรีเมียมจากใบรับรอง</span><span class="v good">×${dv(s, 'qc', 'prem').toFixed(2)}</span></div>
-    <div class="kv"><span class="k">สี ICUMSA ที่ปรับได้</span><span class="v">${dv(s, 'qc', 'color')} IU</span></div>
+    <div class="kv"><span class="k">ทีมคุณภาพลดสีได้</span><span class="v good">${dv(s, 'qc', 'color')} IU · ปิดข้อร้องเรียน ×${dv(s, 'qc', 'fix').toFixed(2)}</span></div>
     <div class="advice ${s.qualityIssue > 0.8 ? 'bad' : 'good'}">${qcAdvice()}</div></div>`;
 }
 function qcAdvice() {

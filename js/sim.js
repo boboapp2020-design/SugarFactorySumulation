@@ -874,9 +874,19 @@ function endOfDay(s) {
     s.loan += interest; s.loanInterestPaid += interest; s.totals.costInterest += interest; t.interest = interest;
   }
 
-  /* ---------- คุณภาพน้ำตาลวันนี้ (ใช้กับความพึงพอใจลูกค้า) ---------- */
-  s.qualityIssue = clamp((oldestAgeH(s) > 30 ? 0.6 : 0) + (s.ctrl.pH > 7.6 ? 0.4 : 0) + (t.ptyFM > 38 ? 0.4 : 0)
-    - dStar(s, 'qc') * 0.25, 0, 2);
+  /* ---------- คุณภาพน้ำตาลวันนี้: สี ICUMSA เป็นตัวหลัก (ทีมคุณภาพลดสีได้จริง) ---------- */
+  // สี ICUMSA ขับจาก น้ำล้างต่ำ + pH สูง + dextran(อ้อยค้าง) แล้วทีมคุณภาพ (dv qc color 0→-450) ช่วยลด
+  const icumsa = clamp(150 + Math.max(0, CONFIG.washRef - s.ctrl.wash) * 130 + Math.max(0, s.ctrl.pH - 7.2) * 220
+    + (oldestAgeH(s) > CONFIG.dextranAfterH ? 140 : 0) + (dv(s, 'qc', 'color') || 0), 40, 1400);
+  s.icumsaColor = Math.round(icumsa);
+  s.qualityIssue = clamp(
+    (oldestAgeH(s) > CONFIG.dextranAfterH ? 0.5 : 0)          // dextran จากอ้อยค้าง (ตรงกับ dextranAfterH)
+    + clamp((icumsa - 150) / 300, 0, 0.9)                     // สีเกินเกรด (มอก.56 น้ำตาลทรายขาว ICUMSA ~45-150)
+    + (s.ctrl.pH > 7.6 ? 0.3 : 0), 0, 2);
+
+  /* ---------- ทีมคุณภาพทยอยปิดข้อร้องเรียนลูกค้า (dv qc fix: 1.00 ไม่มีทีม → 0.35 เก่งสุด) ---------- */
+  const fixMul = dv(s, 'qc', 'fix'); const closeChance = (1 - (fixMul == null ? 1 : fixMul)) * 0.6;
+  if (s.complaints.customer > 0 && rnd() < closeChance) { s.complaints.customer--; logMsg(s, '✅ ทีมคุณภาพปิดข้อร้องเรียนลูกค้าได้ 1 เรื่อง', 'good'); }
 
   /* ---------- ปรับความพึงพอใจ 3 ฝ่ายตามปัจจัยที่กำหนด ---------- */
   updateSatisfaction(s, t);
