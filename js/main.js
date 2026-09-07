@@ -717,7 +717,7 @@ function renderHUD() {
   document.getElementById('hudChips').innerHTML = `
     <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">${TR('วันที่')} <b>${s.day} / ${CONFIG.seasonDays}</b></div>
       <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? TR('🧽 ล้างเครื่อง') : s.started ? `${TR('หีบ')} ${s.crushDaysDone}/${CONFIG.crushDays}` : TR('ยังไม่เปิดหีบ')} · ${clockStr(s.dayProgress)}</div></div></div>
-    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
+    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${TR('เงินสด')}${s.loan > 0 ? ` · ${TR('หนี้')} ฿${fmtM(s.loan)}` : ''}</div>
       <div class="val ${s.loan > 0 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
     <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${TR('น้ำตาลวันนี้')}</div>
       <div class="val">${fmt(t.sugar, 0)} <small>${TR('ตัน')}</small></div></div></div>
@@ -915,6 +915,7 @@ function renderEvents() {
   /* ย้ายไปอยู่ในแท็บรายงานแล้ว — เหลือไว้กันโค้ดเดิมเรียก (no-op ถ้าไม่มีกล่อง) */
   const el = document.getElementById('eventList'); if (!el) return;
   el.innerHTML = state.log.slice(0, 3).map(l => `<li class="${l.kind}"><b>D${l.day}</b><span>${l.text}</span></li>`).join('');
+  translateDOM(el);
 }
 
 /* ตัวเลขลอยเหนืออาคาร (พิกัดเวที) */
@@ -1536,7 +1537,7 @@ function tutorialStep(i) {
 let toastTimer;
 function toast(msg, ms) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
+  t.textContent = msg; translateDOM(t); t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 2200);
 }
 

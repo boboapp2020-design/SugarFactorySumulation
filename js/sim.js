@@ -313,7 +313,7 @@ function breakMachine(s, id, reason) {
   const cost = 350_000 + rnd() * 450_000;
   pay(s, cost, 'repair');
   s.staffSat = clamp(s.staffSat - 2, 0, 100);
-  logMsg(s, `💥 ${dept(id).name}พัง (${reason}) — หยุด ${hrs.toFixed(1)} ชม. ค่าซ่อม ฿${fmt(cost)}`, 'bad');
+  logMsg(s, `💥 ${dept(id).name} พัง (${reason}) — หยุด ${hrs.toFixed(1)} ชม. ค่าซ่อม ฿${fmt(cost)}`, 'bad');
 }
 
 /* เครื่องที่พัง: เดินเวลาซ่อม เมื่อครบให้ค่าพลังกลับมาตามความสามารถทีมซ่อมบำรุง */
@@ -326,7 +326,7 @@ function tickRepairs(s, h) {
         x.downH = 0;
         if (d.kind === 'machine' && x.power <= 0) {
           x.power = dv(s, 'maint', 'restore') * 0.85;
-          logMsg(s, `🟢 ซ่อม${d.name}เสร็จ — ค่าพลังกลับมา ${Math.round(x.power)}%`, 'good');
+          logMsg(s, `🟢 ซ่อม ${d.name} เสร็จ — ค่าพลังกลับมา ${Math.round(x.power)}%`, 'good');
         }
       }
     }
@@ -794,7 +794,7 @@ function wear(s, key, h, load) {
     st.power = clamp(st.power - 12, 0, 100);
     s.totals.breakdowns++; s.todayBreaks = (s.todayBreaks || 0) + 1;
     pay(s, 320000 + rnd() * 300000, 'repair');
-    logMsg(s, `⚠️ ${dept(key).name}ขัดข้อง หยุด ${hrs.toFixed(1)} ชม.`, 'bad');
+    logMsg(s, `⚠️ ${dept(key).name} ขัดข้อง หยุด ${hrs.toFixed(1)} ชม.`, 'bad');
   }
 }
 
@@ -1069,7 +1069,7 @@ function maintAdvice(s) {
   const worst = MACHINE_IDS.map(id => ({ id, p: dPower(s, id) })).sort((a, b) => a.p - b.p)[0];
   const left = CONFIG.cleanBudget - s.cleanDaysUsed;
   const daysLeft = CONFIG.seasonDays - s.day;
-  if (worst.p <= 25) return { lvl: 'bad', text: `⚠️ ${dept(worst.id).name}เหลือค่าพลัง ${Math.round(worst.p)}% — ควรหยุดล้างเครื่องทันที ไม่งั้นพังทั้งสาย`, urge: 2 };
+  if (worst.p <= 25) return { lvl: 'bad', text: `⚠️ ${dept(worst.id).name} เหลือค่าพลัง ${Math.round(worst.p)}% — ควรหยุดล้างเครื่องทันที ไม่งั้นพังทั้งสาย`, urge: 2 };
   if (worst.p <= 45) return { lvl: 'warn', text: `${dept(worst.id).name}เหลือ ${Math.round(worst.p)}% — ควรวางแผนหยุดล้างใน 1-2 วันนี้ (เหลือโควตา ${left} วัน)`, urge: 1 };
   if (left > 0 && daysLeft < left * 1.5) return { lvl: 'warn', text: `เหลือโควตาล้างเครื่อง ${left} วัน แต่เหลือเวลาอีก ${daysLeft} วัน — ใช้ให้หมดจะคุ้มกว่า`, urge: 1 };
   return { lvl: 'good', text: `เครื่องจักรยังดี ต่ำสุดคือ${dept(worst.id).name} ${Math.round(worst.p)}% — ยังไม่จำเป็นต้องหยุด (เหลือโควตา ${left} วัน)`, urge: 0 };

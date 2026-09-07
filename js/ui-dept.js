@@ -25,7 +25,7 @@ function powerBar(id) {
         <small>(กำลังผลิต ${eff}%)</small></span></div>
     <div class="bar health ${cls}"><i style="width:${p}%"></i></div>
     <div class="tip">ลด ${(drain * 24).toFixed(1)}%/วัน — ${x.downH > 0 ? `<b class="bad">พังอยู่ อีก ${x.downH.toFixed(1)} ชม.</b>`
-      : hoursLeft < 999 ? `เหลืออีกราว <b>${(hoursLeft / 24).toFixed(1)} วัน</b>ก่อนถึง 0 (พังทั้งสาย)` : 'ไม่ลด'}</div>`;
+      : hoursLeft < 999 ? `เหลืออีกราว <b>${(hoursLeft / 24).toFixed(1)} วัน</b> ก่อนถึง 0 (พังทั้งสาย)` : 'ไม่ลด'}</div>`;
 }
 
 function overdriveRow(id) {
@@ -397,23 +397,22 @@ function bottleneckHTML() {
   const mx = Math.max(...rows.map(r => r.tpd), 1);
   const worst = rows.find(r => r.tpd === mn);
   return `<div class="card"><h3>🔎 คอขวดของทั้งโรงงาน (ตันอ้อย/วัน)</h3>
-    ${rows.map(r => `<div class="bn-row"><span class="bn-name">${r.name}</span>
+    ${rows.map(r => `<div class="bn-row"><span class="bn-name">${TR(r.name)}</span>
       <span class="bn-bar"><i class="${r.tpd === mn ? 'min' : ''}" style="width:${Math.max(2, r.tpd / mx * 100)}%"></i></span>
       <span class="bn-val">${fmt(Math.round(r.tpd))}</span>
       <button class="btn sm" data-action="station" data-key="${r.id}">→</button></div>`).join('')}
-    <div class="tip">คอขวดตอนนี้คือ <b>${worst.name}</b> ที่ ${fmt(Math.round(mn))} ตัน/วัน — ทั้งโรงงานเดินได้เท่านี้
-      ไม่ว่าจะอัปเกรดแผนกอื่นแค่ไหน · ความไม่สมดุล ${Math.round(bottleneckSpread(state) * 100)}%</div></div>`;
+    <div class="tip">${TR('คอขวดตอนนี้คือ')} <b>${TR(worst.name)}</b> ${TR('ที่')} ${fmt(Math.round(mn))} ${TR('ตัน/วัน')} — ${TR('ทั้งโรงงานเดินได้เท่านี้ ไม่ว่าจะอัปเกรดแผนกอื่นแค่ไหน')} · ${TR('ความไม่สมดุล')} ${Math.round(bottleneckSpread(state) * 100)}%</div></div>`;
 }
 
 /* ---------- หน้าอัปเกรดรวมทั้ง 18 แผนก ---------- */
 function viewUpgrades() {
   const s = state;
   const groups = ['cane', 'process', 'energy', 'support'];
-  return `<div class="card"><h3>💰 เงินสด ฿${fmtM(s.cash)}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</h3>
-      <div class="tip">อัปเกรดทีละ 1 ดาว · เครื่องจักรที่อัปเกรดจะได้ค่าพลังคืน 100%</div></div>`
+  return `<div class="card"><h3>💰 ${TR('เงินสด')} ฿${fmtM(s.cash)}${s.loan > 0 ? ` · ${TR('หนี้')} ฿${fmtM(s.loan)}` : ''}</h3>
+      <div class="tip">${TR('อัปเกรดทีละ 1 ดาว · เครื่องจักรที่อัปเกรดจะได้ค่าพลังคืน 100%')}</div></div>`
     + bottleneckHTML()
     + groups.map(g => `<h2 class="grp">${TR(DEPT_GROUPS[g].name)}</h2>
-        <div class="tip grp-tip">${DEPT_GROUPS[g].tip}</div>
+        <div class="tip grp-tip">${TR(DEPT_GROUPS[g].tip)}</div>
         ${DEPTS.filter(d => d.group === g).map(d => deptRowHTML(d)).join('')}`).join('');
 }
 
@@ -428,14 +427,14 @@ function deptRowHTML(d) {
     <div class="dr-top">
       <span class="dr-no">${d.no || '🛢️'}</span>
       <span class="dr-ic">${d.icon}</span>
-      <span class="dr-name">${d.name}${pw}</span>
+      <span class="dr-name">${TR(d.name)}${pw}</span>
       <span class="dr-stars">${starRow(d.id)}</span>
     </div>
-    <div class="dr-lv">${d.levels[star].name}</div>
-    ${max ? '<div class="tip good">ครบทุกดาวแล้ว</div>' : `<div class="dr-diff">${deptDiffText(d.id, star)}</div>`}
+    <div class="dr-lv">${TR(d.levels[star].name)}</div>
+    ${max ? `<div class="tip good">${TR('ครบทุกดาวแล้ว')}</div>` : `<div class="dr-diff">${deptDiffText(d.id, star)}</div>`}
     <div class="row">
-      ${max ? '' : `<button class="btn ${afford ? 'primary' : 'credit'} sm" data-action="buy" data-id="${d.id}" title="${afford ? '' : `เงินสดขาด ฿${fmtM(cost - s.cash)} — ระบบจะกู้ให้`}">⭐ ${star + 1} ดาว · ฿${fmtM(cost)}${afford ? '' : ' 🏦'}</button>`}
-      <button class="btn sm" data-action="station" data-key="${d.id}">เปิดแผง →</button>
+      ${max ? '' : `<button class="btn ${afford ? 'primary' : 'credit'} sm" data-action="buy" data-id="${d.id}" title="${afford ? '' : `${TR('เงินสดขาด')} ฿${fmtM(cost - s.cash)} — ${TR('ระบบจะกู้ให้')}`}">⭐ ${star + 1} ${TR('ดาว')} · ฿${fmtM(cost)}${afford ? '' : ' 🏦'}</button>`}
+      <button class="btn sm" data-action="station" data-key="${d.id}">${TR('เปิดแผง →')}</button>
     </div></div>`;
 }
 
@@ -443,19 +442,19 @@ function deptRowHTML(d) {
 function viewProduction() {
   const s = state;
   return startBar() + bottleneckHTML() + supplyChainCard()
-    + `<h2 class="grp">🏭 สายการผลิตและพลังงาน</h2>`
+    + `<h2 class="grp">🏭 ${TR('สายการผลิตและพลังงาน')}</h2>`
     + [...LINE_IDS, 'boiler', 'power'].map(id => deptSummary(id)).join('')
     + warehouseCard() + molassesCard();
 }
 
 function deptSummary(id) {
   const s = state, d = dept(id), x = s.dept[id];
-  const st = x.downH > 0 ? `<span class="st bad">พัง ${x.downH.toFixed(1)} ชม.</span>`
-    : x.power < 25 ? '<span class="st warn">ใกล้พัง</span>' : '<span class="st good">เดินเครื่อง</span>';
-  return `<div class="card compact"><h3>${d.icon} ${d.name} ${starRow(id)} ${st}</h3>
-    <div class="kv"><span class="k">${d.levels[dStar(s, id)].name}</span><span class="v">${fmt(Math.round(dCap(s, id)))} ${d.unit === 'sugar' ? 'ตันน้ำตาล' : 'ตันอ้อย'}/วัน</span></div>
+  const st = x.downH > 0 ? `<span class="st bad">${TR('พัง')} ${x.downH.toFixed(1)} ${TR('ชม.')}</span>`
+    : x.power < 25 ? `<span class="st warn">${TR('ใกล้พัง')}</span>` : `<span class="st good">${TR('เดินเครื่อง')}</span>`;
+  return `<div class="card compact"><h3>${d.icon} ${TR(d.name)} ${starRow(id)} ${st}</h3>
+    <div class="kv"><span class="k">${TR(d.levels[dStar(s, id)].name)}</span><span class="v">${fmt(Math.round(dCap(s, id)))} ${d.unit === 'sugar' ? TR('ตันน้ำตาล') : TR('ตันอ้อย')}/${TR('วัน')}</span></div>
     ${powerBar(id)}
-    <div class="row"><button class="btn sm" data-action="station" data-key="${id}">แผงควบคุม →</button>
+    <div class="row"><button class="btn sm" data-action="station" data-key="${id}">${TR('แผงควบคุม →')}</button>
       <span class="od-mini">${OVERDRIVE.map((o, i) => `<button class="od-btn sm ${i === (x.od || 0) ? 'on' : ''}" data-action="over" data-id="${id}" data-v="${i}">${o.label}</button>`).join('')}</span>
     </div></div>`;
 }
@@ -464,9 +463,9 @@ function deptSummary(id) {
 function startBar() {
   const s = state;
   if (!s.started) {
-    return `<div class="card start-card"><h3>🚩 ยังไม่เปิดหีบ</h3>
-      <div class="tip">เวลายังไม่เดิน — ใช้โอกาสนี้ปรับปรุงแผนกให้พร้อมก่อน เมื่อกดเปิดหีบแล้วนาฬิกาจะเริ่มนับ 130 วัน</div>
-      <button class="btn primary big" data-action="startCrush">▶ เริ่มหีบ (เปิดฤดูกาล)</button></div>`;
+    return `<div class="card start-card"><h3>🚩 ${TR('ยังไม่เปิดหีบ')}</h3>
+      <div class="tip">${TR('เวลายังไม่เดิน — ใช้โอกาสนี้ปรับปรุงแผนกให้พร้อมก่อน เมื่อกดเปิดหีบแล้วนาฬิกาจะเริ่มนับ 130 วัน')}</div>
+      <button class="btn primary big" data-action="startCrush">▶ ${TR('เริ่มหีบ (เปิดฤดูกาล)')}</button></div>`;
   }
   const adv = maintAdvice(s);
   return `<div class="card"><h3>🗓️ ฤดูกาล</h3>
@@ -475,7 +474,7 @@ function startBar() {
     <div class="kv"><span class="k">วันล้างเครื่อง</span><span class="v ${s.cleanDaysUsed > CONFIG.cleanBudget ? 'bad' : ''}">${s.cleanDaysUsed} / ${CONFIG.cleanBudget}</span></div>
     <div class="advice ${adv.lvl}">${adv.text}</div>
     <button class="btn ${adv.urge ? 'primary' : ''}" data-action="cleanDay" ${s.cleanDay.active ? 'disabled' : ''}>
-      ${s.cleanDay.active ? `🧽 กำลังล้างเครื่อง (${s.cleanDay.hoursLeft.toFixed(1)} ชม.)` : `🧽 หยุดล้างเครื่อง 1 วัน · ฿${fmtM(CONFIG.cleanDayCost)}`}</button></div>`;
+      ${s.cleanDay.active ? `🧽 ${TR('กำลังล้างเครื่อง')} (${s.cleanDay.hoursLeft.toFixed(1)} ${TR('ชม.')})` : `🧽 ${TR('หยุดล้างเครื่อง 1 วัน')} · ฿${fmtM(CONFIG.cleanDayCost)}`}</button></div>`;
 }
 
 /* ---------- คะแนน 8 ด้าน ---------- */
@@ -486,14 +485,14 @@ function scoreCardHTML() {
       const v = Math.min(100, sc[sp.key] || 0);
       const cls = v >= 75 ? 'good' : v >= 50 ? 'warn' : 'bad';
       const pts = Math.round(v / 100 * sp.w);
-      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${TR(sp.name)} <small style="color:var(--gold-2)">(นน.${sp.w})</small></span>
+      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${TR(sp.name)} <small style="color:var(--gold-2)">(${TR('นน.')}${sp.w})</small></span>
         <span class="sc-bar"><i class="${cls}" style="width:${v}%"></i></span>
         <span class="sc-val ${cls}">${pts}/${sp.w}</span></div>
-        <div class="tip sc-tip">${sp.tip}</div>`;
+        <div class="tip sc-tip">${TR(sp.tip)}</div>`;
     }).join('')}
-    <div class="kv"><span class="k">คะแนนรวม (Ranking)</span><span class="v">${Math.round(sc.overall)}/1000</span></div>
-    <div class="kv"><span class="k">กำไรสุทธิตอนนี้</span><span class="v ${sc._profitValue >= 0 ? 'good' : 'bad'}">฿${fmtM(sc._profitValue)} (เป้า ฿${fmtM(CONFIG.winProfit)})</span></div>
-    <div class="kv"><span class="k">อ้อยเข้าหีบ</span><span class="v">${fmt(Math.round(sc._caneCrushed || 0))} / ${fmt(sc._caneTarget || CONFIG.caneTarget)} ตัน (${Math.round(sc._output || 0)}%)</span></div>
-    <div class="kv"><span class="k">เกรดตอนนี้</span><span class="v ${sc.overall >= 670 ? 'good' : sc.overall >= 540 ? 'warn' : 'bad'}">${sc.grade || '-'} · ${Math.round(sc.overall)} คะแนน</span></div>
-    <div class="kv"><span class="k">ข้อร้องเรียนรวม</span><span class="v ${sc._complaintsTotal ? 'bad' : 'good'}">ลูกค้า ${state.complaints.customer} · แรงงาน ${state.complaints.labour} · ภาครัฐ ${state.complaints.gov}</span></div></div>`;
+    <div class="kv"><span class="k">${TR('คะแนนรวม (Ranking)')}</span><span class="v">${Math.round(sc.overall)}/1000</span></div>
+    <div class="kv"><span class="k">${TR('กำไรสุทธิตอนนี้')}</span><span class="v ${sc._profitValue >= 0 ? 'good' : 'bad'}">฿${fmtM(sc._profitValue)} (${TR('เป้า')} ฿${fmtM(CONFIG.winProfit)})</span></div>
+    <div class="kv"><span class="k">${TR('อ้อยเข้าหีบ')}</span><span class="v">${fmt(Math.round(sc._caneCrushed || 0))} / ${fmt(sc._caneTarget || CONFIG.caneTarget)} ${TR('ตัน')} (${Math.round(sc._output || 0)}%)</span></div>
+    <div class="kv"><span class="k">${TR('เกรดตอนนี้')}</span><span class="v ${sc.overall >= 670 ? 'good' : sc.overall >= 540 ? 'warn' : 'bad'}">${sc.grade || '-'} · ${Math.round(sc.overall)} ${TR('คะแนน')}</span></div>
+    <div class="kv"><span class="k">${TR('ข้อร้องเรียนรวม')}</span><span class="v ${sc._complaintsTotal ? 'bad' : 'good'}">${TR('ลูกค้า')} ${state.complaints.customer} · ${TR('แรงงาน')} ${state.complaints.labour} · ${TR('ภาครัฐ')} ${state.complaints.gov}</span></div></div>`;
 }

@@ -35,8 +35,15 @@ function translateDOM(root) {
     const nodes = []; let n;
     while ((n = w.nextNode())) nodes.push(n);
     for (const node of nodes) {
-      const v = node.nodeValue, k = v.trim();
-      if (k.length > 0 && DICT_EN[k] && /[ก-๙]/.test(k)) node.nodeValue = v.replace(k, DICT_EN[k]);
+      const v = node.nodeValue;
+      if (!/[ก-๙]/.test(v)) continue;
+      const k = v.trim();
+      /* 1) whole-node exact match (handles full labels & sentences that are a key) */
+      if (k.length > 0 && DICT_EN[k]) { node.nodeValue = v.replace(k, DICT_EN[k]); continue; }
+      /* 2) Thai-run match: replace each maximal run of Thai characters that is itself a
+            dictionary key. Thai compounds have no internal spaces, so a run is a whole
+            word/phrase — replacing only complete runs can never inject into another word. */
+      node.nodeValue = v.replace(/[฀-๿]+/g, run => (DICT_EN[run] !== undefined ? DICT_EN[run] : run));
     }
   } catch (e) {}
 }
