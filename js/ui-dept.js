@@ -123,7 +123,7 @@ function deptUpgradeHTML(id) {
 function deptPanel(id) {
   const d = dept(id), s = state, x = s.dept[id];
   if (!d || !x) return '<div class="card">ไม่พบแผนกนี้</div>';
-  const head = `<div class="card dept-head"><h3>${d.icon} ${d.no ? 'ทีมที่ ' + d.no + ' — ' : ''}${d.name}</h3>
+  const head = `<div class="card dept-head"><h3>${d.icon} ${d.no ? (LANG==='en'?'Team '+d.no+' — ':'ทีมที่ ' + d.no + ' — ') : ''}${L(d.name)}</h3>
     <div class="up-stars">${starRow(id)}</div>
     <div class="tip">${d.role}</div>
     <div class="kv"><span class="k">ตัวชี้วัด</span><span class="v">${d.metric}</span></div></div>`;
@@ -486,7 +486,7 @@ function scoreCardHTML() {
       const v = Math.min(100, sc[sp.key] || 0);
       const cls = v >= 75 ? 'good' : v >= 50 ? 'warn' : 'bad';
       const pts = Math.round(v / 100 * sp.w);
-      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${sp.name} <small style="color:var(--gold-2)">(นน.${sp.w})</small></span>
+      return `<div class="sc-row"><span class="sc-name">${sp.icon} ${L(sp.name)} <small style="color:var(--gold-2)">(นน.${sp.w})</small></span>
         <span class="sc-bar"><i class="${cls}" style="width:${v}%"></i></span>
         <span class="sc-val ${cls}">${pts}/${sp.w}</span></div>
         <div class="tip sc-tip">${sp.tip}</div>`;

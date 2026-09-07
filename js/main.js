@@ -203,7 +203,7 @@ function showSplash(pane) {
   const navItems = [['home', '🏠 หน้าแรก'], ['manual', '📖 วิธีเล่น'], ['depts', '🏭 18 แผนก'], ['scoring', '🏅 การวัดผล'], ['ranking', '🏆 จัดอันดับ'], ['sound', '⚙️ ตั้งค่า']];
   const cur = navItems.some(([v]) => v === UI.spPane) ? UI.spPane : 'home';
   const nav = navItems.map(([v, t]) =>
-    `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${t}</button>`).join('');
+    `<button class="sp-navbtn ${v === cur ? 'on' : ''}" data-action="spNav" data-v="${v}">${L(t)}</button>`).join('');
   sp.innerHTML = `
     <div class="sp-bg"></div>
     <div class="sp-fx" aria-hidden="true">
@@ -217,7 +217,7 @@ function showSplash(pane) {
     <header class="sp-nav">
       <div class="sp-brand2"><span class="sp-blogo">🏭</span><span class="sp-btxt">Sugar Factory<small>Manager</small></span></div>
       <nav class="sp-navmid">${nav}</nav>
-      <button class="sp-lang" data-action="spNav" data-v="lang">🌐 ไทย ▾</button>
+      <button class="sp-lang" data-action="spNav" data-v="lang">🌐 ${LANG === 'en' ? 'EN' : 'ไทย'} ▾</button>
     </header>
     <div class="sp-loginbox pane-${UI.spPane}">${splashPane(UI.spPane, saved, name)}</div>`;
   sp.classList.remove('hidden', 'fade');
@@ -275,7 +275,7 @@ function splashPane(pane, saved, name) {
         <p class="sp-note" style="margin:2px 0 6px">${DEPT_GROUPS[g].tip}</p>
         ${DEPTS.filter(d => d.group === g).map(d => `
           <div class="sp-deptrow"><span class="sp-dept-ic">${d.icon}</span>
-            <div><b>${d.no ? d.no + '. ' : ''}${d.name}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> เต็ม ${d.maxStar} ดาว</small></span>
+            <div><b>${d.no ? d.no + '. ' : ''}${L(d.name)}</b> <span class="sp-dept-star">${'★'.repeat(d.maxStar)}<small> เต็ม ${d.maxStar} ดาว</small></span>
               <div>${d.role}</div></div></div>`).join('')}`).join('')}
     </div>
     <div class="sp-actions"><button class="sp-btn" data-action="spPane" data-v="home">เข้าใจแล้ว</button></div>`;
@@ -285,7 +285,7 @@ function splashPane(pane, saved, name) {
     <div class="sp-scroll">
       <p>ตอนจบฤดู (130 วัน) เกมให้เกรด <b>S–F</b> จาก <b>คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000 แต้ม</b> (สำหรับระบบ Ranking แข่งขัน) — เรียงตามความสำคัญ:</p>
       ${SCORE_SPEC.map((s, i) => `<div class="sp-deptrow"><span class="sp-dept-ic">${s.icon}</span>
-        <div><b>${i + 1}. ${s.name}</b> <small style="color:var(--gold-2)">น้ำหนัก ${s.w} แต้ม</small>${s.lower ? ' <small>(ยิ่งน้อยยิ่งดี)</small>' : ''}<div>${s.tip}</div></div></div>`).join('')}
+        <div><b>${i + 1}. ${L(s.name)}</b> <small style="color:var(--gold-2)">น้ำหนัก ${s.w} แต้ม</small>${s.lower ? ' <small>(ยิ่งน้อยยิ่งดี)</small>' : ''}<div>${s.tip}</div></div></div>`).join('')}
       <h3>เกณฑ์เกรด (คะแนนรวมถ่วงน้ำหนัก เต็ม 1,000)</h3>
       <div class="sp-grades">
         ${[['S', '945+', '#ffe08a'], ['A+', '890–944', '#a8f0b0'], ['A', '810–889', '#7be08a'], ['B+', '750–809', '#9ad0ff'], ['B', '670–749', '#5cb3ff'], ['C+', '610–669', '#ffd07a'], ['C', '540–609', '#ffb547'], ['F', '< 540', '#ff6b6b']]
@@ -443,7 +443,7 @@ function onClick(e) {
     }
     case 'spPane': showSplash(d.v); break;
     case 'spNav': {
-      if (d.v === 'lang') { toast('🌐 ตอนนี้รองรับภาษาไทย'); break; }
+      if (d.v === 'lang') { setLang(LANG === 'en' ? 'th' : 'en'); toast(LANG === 'en' ? 'Switched to English' : 'เปลี่ยนเป็นภาษาไทย'); if (typeof render === 'function' && state && state.started) render(); showSplash(UI.spPane); break; }
       showSplash(d.v);   // home / manual / depts / scoring / sound — เปิดเนื้อหาจริง
       break;
     }
@@ -715,19 +715,19 @@ function renderHUD() {
   document.getElementById('hudChips').innerHTML = `
     <div class="chip" style="width:196px" title="วันหีบ ${s.crushDaysDone}/${CONFIG.crushDays} · วันล้างเครื่อง ${s.cleanDaysUsed}/${CONFIG.cleanBudget} · รายจ่ายวันนี้ ฿${fmt(Math.round(spend))}"><span class="ic" style="background:#3b5bdb">📅</span><div><div class="lbl">วันที่ <b>${s.day} / ${CONFIG.seasonDays}</b></div>
       <div class="val" style="font-size:14px;font-weight:500">${s.cleanDay.active ? '🧽 ล้างเครื่อง' : s.started ? `หีบ ${s.crushDaysDone}/${CONFIG.crushDays}` : 'ยังไม่เปิดหีบ'} · ${clockStr(s.dayProgress)}</div></div></div>
-    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">เงินสด${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
+    <div class="chip" style="width:246px" title="กำไรสุทธิ ฿${fmtM(profit)} / เป้า ฿${fmtM(CONFIG.winProfit)} · ค่าอ้อยค้างจ่าย ฿${fmtM(s.payable.accrued + s.payable.amount)} · ค่าจ้างค้างจ่าย ฿${fmtM(s.wagesAccrued)}"><span class="ic" style="background:#2f9e44">💵</span><div><div class="lbl">${L('เงินสด')}${s.loan > 0 ? ` · หนี้ ฿${fmtM(s.loan)}` : ''}</div>
       <div class="val ${s.loan > 0 ? 'dn' : ''}">฿ ${fmt(Math.round(s.cash))} <small class="${chg >= 0 ? 'up' : 'dn'}">${chg >= 0 ? '▲' : '▼'}${Math.abs(chg).toFixed(1)}%</small></div></div></div>
-    <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">น้ำตาลวันนี้</div>
+    <div class="chip" style="width:172px" title="คลัง ${fmt(Math.round(s.stock.sugar))} ตัน · Recovery ${(K.recovery || 0).toFixed(1)}% · Extraction ${(K.extraction || 0).toFixed(1)}%"><span class="ic" style="background:#5c7cfa">🧊</span><div><div class="lbl">${L('น้ำตาลวันนี้')}</div>
       <div class="val">${fmt(t.sugar, 0)} <small>ตัน</small></div></div></div>
-    <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">ไฟฟ้า</div>
+    <div class="chip" style="width:170px" title="ขายไฟ ${fmt(K.kwhPerTc || 0, 0)} kWh/ตันอ้อย · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))} ตัน"><span class="ic" style="background:#f08c00">⚡</span><div><div class="lbl">${L('ไฟฟ้า')}</div>
       <div class="val">${mw.toFixed(1)} MW<span class="meter"><i style="width:${Math.min(100, mw * 6)}%"></i></span></div></div></div>
-    <div class="chip" style="width:150px" title="ส่งตรงเวลาและคุณภาพคงที่ · สำเร็จ ${s.totals.ordersDone} / พลาด ${s.totals.ordersFailed} · ข้อร้องเรียน ${s.complaints.customer}"><span class="ic" style="background:#e8590c">${s.custSat >= 70 ? '😊' : s.custSat >= 50 ? '😐' : '😟'}</span><div><div class="lbl">ลูกค้า</div>
+    <div class="chip" style="width:150px" title="ส่งตรงเวลาและคุณภาพคงที่ · สำเร็จ ${s.totals.ordersDone} / พลาด ${s.totals.ordersFailed} · ข้อร้องเรียน ${s.complaints.customer}"><span class="ic" style="background:#e8590c">${s.custSat >= 70 ? '😊' : s.custSat >= 50 ? '😐' : '😟'}</span><div><div class="lbl">${L('ลูกค้า')}</div>
       <div class="val ${s.custSat < 55 ? 'dn' : ''}">${Math.round(s.custSat)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ขวัญกำลังใจพนักงาน · ภาระเร่งเครื่อง ${(overdriveLoad(s) * 100).toFixed(0)}% · ข้อร้องเรียนแรงงาน ${s.complaints.labour}"><span class="ic" style="background:#7048e8">${s.staffSat >= 70 ? '💪' : s.staffSat >= 50 ? '😓' : '😡'}</span><div><div class="lbl">พนักงาน</div>
+    <div class="chip" style="width:150px" title="ขวัญกำลังใจพนักงาน · ภาระเร่งเครื่อง ${(overdriveLoad(s) * 100).toFixed(0)}% · ข้อร้องเรียนแรงงาน ${s.complaints.labour}"><span class="ic" style="background:#7048e8">${s.staffSat >= 70 ? '💪' : s.staffSat >= 50 ? '😓' : '😡'}</span><div><div class="lbl">${L('พนักงาน')}</div>
       <div class="val ${s.staffSat < 50 ? 'dn' : ''}">${Math.round(s.staffSat)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ความพึงพอใจชาวไร่ · ราคารับซื้อ ลดคิวรอ ไม่เสียอ้อยให้คู่แข่ง · มีผลต่อปริมาณอ้อยเข้าโรงงานและคะแนน"><span class="ic" style="background:#2f9e44">${s.growerTrust >= 70 ? '🌾' : s.growerTrust >= 50 ? '😐' : '😠'}</span><div><div class="lbl">ชาวไร่</div>
+    <div class="chip" style="width:150px" title="ความพึงพอใจชาวไร่ · ราคารับซื้อ ลดคิวรอ ไม่เสียอ้อยให้คู่แข่ง · มีผลต่อปริมาณอ้อยเข้าโรงงานและคะแนน"><span class="ic" style="background:#2f9e44">${s.growerTrust >= 70 ? '🌾' : s.growerTrust >= 50 ? '😐' : '😠'}</span><div><div class="lbl">${L('ชาวไร่')}</div>
       <div class="val ${s.growerTrust < 50 ? 'dn' : ''}">${Math.round(s.growerTrust)}%</div></div></div>
-    <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">ความปลอดภัย</div>
+    <div class="chip" style="width:150px" title="ดัชนีความปลอดภัย · เร่งเครื่องหนัก/เครื่องทรุด/ขวัญต่ำ = เสี่ยง · ทีมฉุกเฉิน+ซ่อมบำรุง+การ์ดเครื่อง = ดี · ต่ำ = อุบัติเหตุ/ไฟไหม้บ่อยขึ้น"><span class="ic" style="background:#e8730c">${(s.safety ?? 90) >= 70 ? '🦺' : (s.safety ?? 90) >= 45 ? '⚠️' : '🚨'}</span><div><div class="lbl">${L('ความปลอดภัย')}</div>
       <div class="val ${(s.safety ?? 90) < 50 ? 'dn' : ''}">${Math.round(s.safety ?? 90)}%</div></div></div>`;
   const l3 = document.querySelector('#hud .logo .l3');
   if (l3 && s.player && s.player.name) l3.innerHTML = `ผู้จัดการ <b>${escapeHtml(s.player.name)}</b>${s.started ? '' : ' · ยังไม่เปิดหีบ'}`;
@@ -901,7 +901,7 @@ function renderMarkers() {
     const popIdx = prev !== undefined && stars > prev ? stars - 1 : -1;
     const D = dept(b.dept);
     const num = b.n > 0 ? b.n + '. ' : '';
-    parts.push(`<button class="marker bld-label ${b.compact ? 'mk-sm' : ''} ${info.alert && !cleaning ? 'alert' : ''}" style="left:${cx.toFixed(0)}px;top:${(cy - 6).toFixed(0)}px" data-action="station" data-key="${b.key}" title="${info.tip}"><span class="dot ${dot}"></span><span class="mk-name">${num}${D ? D.icon : ''} ${b.name}</span>${stars < 0 ? '' : SCENE.starsHTML(stars, popIdx, SCENE.starMax(b.key))}${info.sub ? `<span class="mk-val ${b.compact ? 'sm' : ''} ${info.vcls}">${info.sub}</span>` : ''}</button>`);
+    parts.push(`<button class="marker bld-label ${b.compact ? 'mk-sm' : ''} ${info.alert && !cleaning ? 'alert' : ''}" style="left:${cx.toFixed(0)}px;top:${(cy - 6).toFixed(0)}px" data-action="station" data-key="${b.key}" title="${info.tip}"><span class="dot ${dot}"></span><span class="mk-name">${num}${D ? D.icon : ''} ${L(b.name)}</span>${stars < 0 ? '' : SCENE.starsHTML(stars, popIdx, SCENE.starMax(b.key))}${info.sub ? `<span class="mk-val ${b.compact ? 'sm' : ''} ${info.vcls}">${info.sub}</span>` : ''}</button>`);
   }
   const html = parts.join('');
   if (html !== lastMarkersHTML) { lastMarkersHTML = html; document.getElementById('markers').innerHTML = html; }
@@ -1425,7 +1425,7 @@ function showSeasonEnd() {
       profit: R.profit, cane: R.caneTotal, sugar: R.sugarTotal, days: R.days });
   }
   const K = R.kpi, T = s.totals;
-  const SC = SCORE_SPEC.map(sp => [sp.icon + ' ' + sp.name, sp.key, sp.w]);
+  const SC = SCORE_SPEC.map(sp => [sp.icon + ' ' + L(sp.name), sp.key, sp.w]);
   const bar = (name, v, w) => `<div class="sc-row"><span>${name} <small style="color:#c9a94a">(นน.${w})</small></span><div class="sc-bar"><i style="width:${v.toFixed(0)}%;background:${v >= 70 ? '#4cd47a' : v >= 45 ? '#ffb547' : '#ff5c5c'}"></i></div><b>${Math.round(v / 100 * w)}/${w}</b></div>`;
   const revTot = R.revenue.sugar + R.revenue.molasses + R.revenue.power;
   const costTot = Object.values(R.cost).reduce((a, b) => a + b, 0);
