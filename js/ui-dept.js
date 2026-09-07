@@ -363,13 +363,16 @@ function qcAdvice() {
 
 function ertCard() {
   const s = state;
-  return `<div class="card"><h3>🚨 ความพร้อมรับเหตุ</h3>
+  const saf = Math.round(s.safety ?? 90);
+  return `<div class="card"><h3>🦺 ความปลอดภัย & ความพร้อมรับเหตุ (จป.)</h3>
+    <div class="kv"><span class="k">ดัชนีความปลอดภัย</span><span class="v ${saf < 45 ? 'bad' : saf < 70 ? 'warn' : 'good'}">${saf}%</span></div>
+    <div class="bar stock"><i style="width:${saf}%;background:${saf < 45 ? '#ff5c5c' : saf < 70 ? '#ffb547' : '#4cd47a'}"></i></div>
     <div class="kv"><span class="k">เวลาแก้เหตุ</span><span class="v good">×${dv(s, 'ert', 'time').toFixed(2)}</span></div>
     <div class="kv"><span class="k">ค่าเสียหาย</span><span class="v good">×${dv(s, 'ert', 'cost_').toFixed(2)}</span></div>
     <div class="kv"><span class="k">โอกาสเกิดเหตุ</span><span class="v good">×${dv(s, 'ert', 'prob').toFixed(2)}</span></div>
     <div class="kv"><span class="k">เหตุที่เกิดแล้ว</span><span class="v">${s.emergencies.length} ครั้ง</span></div>
-    <div class="tip">ดูแล 3 เรื่อง: 🔥 ไฟไหม้ · 🚑 อุบัติเหตุ · 🌊 บ่อบำบัดล้น/น้ำเสียเกินค่า
-      — ไฟไหม้ใช้เวลาดับ 1 วัน ลดลงตามดาวของทีมนี้</div>
+    <div class="tip">งาน <b>จป./คปอ.</b> + รับเหตุ: 🔥 ไฟไหม้/ฝุ่นระเบิด · 🚑 อุบัติเหตุ/ที่อับอากาศ · 🌡️ หม้อไอน้ำ · ☁️ SO₂ · 🌊 บ่อบำบัดล้น
+      — ยิ่งดาวสูง <b>ดัชนีความปลอดภัยยิ่งขึ้น</b> เกิดเหตุน้อยลง แก้เร็วขึ้น (ดาว 0 = ผิดกฎหมาย จป./คปอ. บังคับตามกฎหมาย)</div>
     ${s.emergencies.slice(-4).reverse().map(e => `<div class="kv"><span class="k">วันที่ ${e.day} · ${e.name}</span><span class="v">${e.opt}</span></div>`).join('')}</div>`;
 }
 
