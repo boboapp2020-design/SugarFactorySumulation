@@ -46,4 +46,19 @@ const DICT_EN = {
   'เริ่มฤดูใหม่ (ล้างเกมเดิม)': 'New Season (clear save)', 'กลับหน้าแรก': 'Back to Home', 'เข้าใจแล้ว': 'Got it',
   'เริ่มหีบ': 'Start Crushing', 'หยุด': 'Pause', 'เดินต่อ': 'Resume',
   'ชื่อโรงงาน / ผู้จัดการ': 'Factory / Manager name', 'ชื่อโรงงาน': 'Factory name',
+
+  /* --- ป้าย/คำทั่วไปในโมดัลเหตุการณ์-ฉุกเฉิน-แผนก --- */
+  'เหตุฉุกเฉิน': 'Emergency', 'สาเหตุ': 'Cause', 'สถานการณ์': 'Situation', 'ผลกระทบ': 'Impact',
+  'คำแนะนำ': 'Advice', 'ฟรี': 'Free', 'ชม.': 'h', 'ดาว': 'stars', 'ที่': 'at',
+  'ใช้เวลา ~': 'takes ~', 'ต้องมี': 'requires ', 'อย่างน้อย': 'at least',
+  'ทีมคุณภาพ (ทีม 17)': 'Quality Team (Dept 17)', 'ทีมตอบสนองเหตุฉุกเฉิน (ทีม 15)': 'Emergency Team (Dept 15)',
+  'ทีมฉุกเฉิน': 'Emergency team', 'ทีมคุณภาพ': 'Quality team',
+  'ต้องตัดสินใจภายใน': 'Decide within', 'ตัดสินใจภายใน': 'Decide within',
+  '(เวลาในเกม) ไม่เช่นนั้นระบบจะเลือกทางที่แย่ที่สุด': '(game time), or the system picks the worst option',
+  '(เวลาในเกม) ไม่เช่นนั้นระบบใช้': '(game time), otherwise the system uses',
+  'รอตัดสินใจ อีก': 'awaiting decision, in', 'คลิกเพื่อเลือก': 'click to choose',
+  'รอคำสั่งการ อีก': 'awaiting orders, in', 'คลิกเพื่อตัดสินใจ': 'click to decide',
+  'กำลังแก้ไข': 'resolving', 'เหลือ': 'left',
+  'ตัวชี้วัด': 'Metric', 'อุปกรณ์/ทีม': 'Equipment / team', 'ดาวถัดไป': 'Next star',
+  'ภารกิจวันนี้': "Today's Tasks", 'ตัน/วัน': 't/day', 'อัปเกรด': 'Upgrade ',
 };

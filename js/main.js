@@ -271,7 +271,7 @@ function splashPane(pane, saved, name) {
     <div class="sp-scroll">
       <p>โรงงานมี <b>18 แผนก</b> ที่ต้องบริหารและอัปเกรดเป็นดาว — สายวัตถุดิบต้องสมดุลกัน เครื่องจักรมีค่าพลังที่ลดลงเรื่อย ๆ ทีมสนับสนุนช่วยลดความเสี่ยงและเพิ่มรายได้</p>
       ${Object.keys(DEPT_GROUPS).map(g => `
-        <h3>${DEPT_GROUPS[g].name}</h3>
+        <h3>${L(DEPT_GROUPS[g].name)}</h3>
         <p class="sp-note" style="margin:2px 0 6px">${DEPT_GROUPS[g].tip}</p>
         ${DEPTS.filter(d => d.group === g).map(d => `
           <div class="sp-deptrow"><span class="sp-dept-ic">${d.icon}</span>
@@ -369,7 +369,7 @@ function showPrepBrief() {
   showModal(`<h2>🗓️ ก่อนเปิดหีบ</h2>
     <p class="tip">วันหีบยังไม่เดิน คุณมีเวลาเตรียมตัวเต็มที่ — ลงทุนแผนกที่ต้องการ ตั้งค่ากระบวนการ แล้วค่อยกด <b>เริ่มหีบ</b></p>
     <div class="card"><h3>กำลังของสายวัตถุดิบตอนนี้</h3>
-      ${chain.map(c => `<div class="kv"><span class="k">${c.name}</span><span class="v">${fmt(Math.round(c.tpd))} ตัน/วัน</span></div>`).join('')}
+      ${chain.map(c => `<div class="kv"><span class="k">${L(c.name)}</span><span class="v">${fmt(Math.round(c.tpd))} ${L('ตัน/วัน')}</span></div>`).join('')}
       <div class="tip">ทั้งสี่ควรใกล้เคียงกัน — ตอนนี้ทุกแผนกอยู่ที่ 0 ดาว (1,000 ตัน/วัน) ซึ่งน้อยมาก</div></div>
     <div class="card"><h3>เงินและกำหนดจ่าย</h3>
       <div class="kv"><span class="k">เงินสดตั้งต้น</span><span class="v">฿${fmtM(state.cash)}</span></div>
@@ -749,13 +749,13 @@ function renderMissions() {
   const s = state, qs = activeQuests(s);
   document.getElementById('missionList').innerHTML = qs.map(q => {
     const p = questProgress(q);
-    return `<li class="quest"><div class="q-head"><span>${q.icon} ${q.title}</span><b>฿${fmtM(q.reward.cash)}</b></div>
-      <div class="q-desc">${q.desc}</div>
+    return `<li class="quest"><div class="q-head"><span>${q.icon} ${L(q.title)}</span><b>฿${fmtM(q.reward.cash)}</b></div>
+      <div class="q-desc">${L(q.desc)}</div>
       <div class="q-bar"><i style="width:${p.pct.toFixed(0)}%"></i></div><div class="q-prog">${p.text}</div></li>`;
   }).join('') || '<li>ทำเควสครบทุกข้อแล้ว 🏆</li>';
   /* ภารกิจรายวัน */
   const daily = (s.daily && s.daily.tasks) || [];
-  if (daily.length) document.getElementById('missionList').innerHTML += `<li class="daily"><div class="q-head"><span>📅 ภารกิจวันนี้</span></div>${daily.map(t => `<div class="d-row ${t.done ? 'done' : ''}"><span class="cb ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</span><span class="d-txt">${t.text}</span><b>+฿${fmtM(t.reward)}</b></div>`).join('')}</li>`;
+  if (daily.length) document.getElementById('missionList').innerHTML += `<li class="daily"><div class="q-head"><span>📅 ${L('ภารกิจวันนี้')}</span></div>${daily.map(t => `<div class="d-row ${t.done ? 'done' : ''}"><span class="cb ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</span><span class="d-txt">${L(t.text)}</span><b>+฿${fmtM(t.reward)}</b></div>`).join('')}</li>`;
   const sum = document.querySelector('#missions h3 .sum');
   if (sum) sum.textContent = `${s.questsDone.length}/${QUESTS.length}`;
 }
@@ -937,25 +937,25 @@ function showEmergencyModal() {
   const opts = def.options.map((o, i) => {
     const locked = (o.needTeam && teamLv < o.needTeam) || (o.needQC && qcLv < o.needQC);
     return `<button class="emer-opt ${locked ? 'locked' : ''}" data-action="emerChoice" data-i="${i}" ${locked ? 'disabled' : ''}>
-      <b>${o.label}</b>${o.cost ? ` <span class="cost">฿${fmtM(o.cost)}</span>` : ' <span class="cost free">ฟรี</span>'}
-      <span class="d">${o.desc}${o.hours ? ` · ใช้เวลา ~${Math.max(1, Math.round(o.hours * (o.needTeam ? up(state, 'ert', 'ertTime') : 1)))} ชม.` : ''}</span>
-      ${locked ? `<span class="d lock">🔒 ต้องมี${o.needQC ? 'ทีมคุณภาพ (ทีม 17)' : 'ทีมตอบสนองเหตุฉุกเฉิน (ทีม 15)'} อย่างน้อย ${o.needQC || o.needTeam} ดาว</span>` : ''}</button>`;
+      <b>${L(o.label)}</b>${o.cost ? ` <span class="cost">฿${fmtM(o.cost)}</span>` : ` <span class="cost free">${L('ฟรี')}</span>`}
+      <span class="d">${L(o.desc)}${o.hours ? ` · ${L('ใช้เวลา ~')}${Math.max(1, Math.round(o.hours * (o.needTeam ? up(state, 'ert', 'ertTime') : 1)))} ${L('ชม.')}` : ''}</span>
+      ${locked ? `<span class="d lock">🔒 ${L('ต้องมี')}${o.needQC ? L('ทีมคุณภาพ (ทีม 17)') : L('ทีมตอบสนองเหตุฉุกเฉิน (ทีม 15)')} ${L('อย่างน้อย')} ${o.needQC || o.needTeam} ${L('ดาว')}</span>` : ''}</button>`;
   }).join('');
-  showModal(`<h2 style="color:#ff8a8a">🚨 เหตุฉุกเฉิน: ${def.name}</h2>
-    <p><u style="text-decoration:none;color:var(--gold)">สาเหตุ</u> ${def.cause}${E.station ? ` · ที่ ${STATION_META[E.station].name}` : ''}</p>
-    ${def.fix ? `<div class="ev-advice">💡 <b>คำแนะนำ:</b> ${def.fix}</div>` : ''}
-    <p class="tip">ต้องตัดสินใจภายใน <b class="dn">${left.toFixed(1)} ชม.</b> (เวลาในเกม) ไม่เช่นนั้นระบบจะเลือกทางที่แย่ที่สุด · ทีมฉุกเฉิน ${teamLv} ดาว · ทีมคุณภาพ ${qcLv} ดาว</p>
+  showModal(`<h2 style="color:#ff8a8a">🚨 ${L('เหตุฉุกเฉิน')}: ${L(def.name)}</h2>
+    <p><u style="text-decoration:none;color:var(--gold)">${L('สาเหตุ')}</u> ${L(def.cause)}${E.station ? ` · ${L('ที่')} ${L(STATION_META[E.station].name)}` : ''}</p>
+    ${def.fix ? `<div class="ev-advice">💡 <b>${L('คำแนะนำ')}:</b> ${L(def.fix)}</div>` : ''}
+    <p class="tip">${L('ต้องตัดสินใจภายใน')} <b class="dn">${left.toFixed(1)} ${L('ชม.')}</b> ${L('(เวลาในเกม) ไม่เช่นนั้นระบบจะเลือกทางที่แย่ที่สุด')} · ${L('ทีมฉุกเฉิน')} ${teamLv} ${L('ดาว')} · ${L('ทีมคุณภาพ')} ${qcLv} ${L('ดาว')}</p>
     <div class="emer-opts">${opts}</div>`);
 }
 function showDecisionModal(d) {
   const ev = EVENTS.find(e => e.id === d.evId); if (!ev) return;
   const left = Math.max(0, d.deadlineH - d.elapsedH), def = ev.choices[ev.defaultChoice || 0];
-  showModal(`<h2>${ev.icon} ${ev.name}</h2>
-    <p><u style="text-decoration:none;color:var(--gold)">สถานการณ์</u> ${ev.cause}</p>
-    ${ev.effect ? `<p class="ev-effect">⚠️ ผลกระทบ: ${ev.effect}</p>` : ''}
-    ${ev.fix ? `<div class="ev-advice">💡 <b>คำแนะนำ:</b> ${ev.fix}</div>` : ''}
-    <p class="tip">ตัดสินใจภายใน <b>${left.toFixed(1)} ชม.</b> (เวลาในเกม) ไม่เช่นนั้นระบบใช้ "${def.label}"</p>
-    <div class="emer-opts">${ev.choices.map((c, i) => `<button class="emer-opt dec" data-action="decide" data-ev="${ev.id}" data-i="${i}"><b>${c.label}</b><span class="d">${c.desc}</span></button>`).join('')}</div>`);
+  showModal(`<h2>${ev.icon} ${L(ev.name)}</h2>
+    <p><u style="text-decoration:none;color:var(--gold)">${L('สถานการณ์')}</u> ${L(ev.cause)}</p>
+    ${ev.effect ? `<p class="ev-effect">⚠️ ${L('ผลกระทบ')}: ${L(ev.effect)}</p>` : ''}
+    ${ev.fix ? `<div class="ev-advice">💡 <b>${L('คำแนะนำ')}:</b> ${L(ev.fix)}</div>` : ''}
+    <p class="tip">${L('ตัดสินใจภายใน')} <b>${left.toFixed(1)} ${L('ชม.')}</b> ${L('(เวลาในเกม) ไม่เช่นนั้นระบบใช้')} "${L(def.label)}"</p>
+    <div class="emer-opts">${ev.choices.map((c, i) => `<button class="emer-opt dec" data-action="decide" data-ev="${ev.id}" data-i="${i}"><b>${L(c.label)}</b><span class="d">${L(c.desc)}</span></button>`).join('')}</div>`);
 }
 function renderEmergencyBanner() {
   let b = document.getElementById('emerBanner');
@@ -966,15 +966,15 @@ function renderEmergencyBanner() {
     if (!b) { b = document.createElement('button'); b.id = 'emerBanner'; b.dataset.action = 'emerShow'; document.getElementById('stage').appendChild(b); }
     const ev = EVENTS.find(e => e.id === d.evId);
     b.className = 'decision waiting';
-    b.innerHTML = `${ev.icon} <b>${ev.name}</b> — รอตัดสินใจ อีก ${Math.max(0, d.deadlineH - d.elapsedH).toFixed(1)} ชม. <span class="act">คลิกเพื่อเลือก</span>`;
+    b.innerHTML = `${ev.icon} <b>${L(ev.name)}</b> — ${L('รอตัดสินใจ อีก')} ${Math.max(0, d.deadlineH - d.elapsedH).toFixed(1)} ${L('ชม.')} <span class="act">${L('คลิกเพื่อเลือก')}</span>`;
     return;
   }
   if (b) b.className = '';
   if (!b) { b = document.createElement('button'); b.id = 'emerBanner'; b.dataset.action = 'emerShow'; document.getElementById('stage').appendChild(b); }
   const def = EMERGENCIES.find(d => d.id === E.id);
   b.innerHTML = E.choice === null
-    ? `${def.icon} <b>${def.name}</b> — รอคำสั่งการ อีก ${Math.max(0, E.deadlineH - E.elapsedH).toFixed(1)} ชม. <span class="act">คลิกเพื่อตัดสินใจ</span>`
-    : `${def.icon} <b>${def.name}</b> — กำลังแก้ไข: ${E.optLabel} (เหลือ ${Math.max(0, E.resolveAtH - E.elapsedH).toFixed(1)} ชม.)`;
+    ? `${def.icon} <b>${L(def.name)}</b> — ${L('รอคำสั่งการ อีก')} ${Math.max(0, E.deadlineH - E.elapsedH).toFixed(1)} ${L('ชม.')} <span class="act">${L('คลิกเพื่อตัดสินใจ')}</span>`
+    : `${def.icon} <b>${L(def.name)}</b> — ${L('กำลังแก้ไข')}: ${L(E.optLabel)} (${L('เหลือ')} ${Math.max(0, E.resolveAtH - E.elapsedH).toFixed(1)} ${L('ชม.')})`;
   b.classList.toggle('waiting', E.choice === null);
 }
 function showEventBanner(evs) {
