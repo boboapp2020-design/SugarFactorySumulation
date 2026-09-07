@@ -474,10 +474,10 @@ function startBar() {
       ${s.cleanDay.active ? `🧽 กำลังล้างเครื่อง (${s.cleanDay.hoursLeft.toFixed(1)} ชม.)` : `🧽 หยุดล้างเครื่อง 1 วัน · ฿${fmtM(CONFIG.cleanDayCost)}`}</button></div>`;
 }
 
-/* ---------- คะแนน 7 ด้าน ---------- */
+/* ---------- คะแนน 8 ด้าน ---------- */
 function scoreCardHTML() {
   const sc = computeScore(state);
-  return `<div class="card"><h3>🏅 ผลการบริหาร 7 ด้าน</h3>
+  return `<div class="card"><h3>🏅 ผลการบริหาร 8 ด้าน</h3>
     ${SCORE_SPEC.map(sp => {
       const v = Math.min(100, sc[sp.key] || 0);
       const cls = v >= 75 ? 'good' : v >= 50 ? 'warn' : 'bad';

@@ -1095,7 +1095,7 @@ function quickRepair(s, id) {
 }
 
 /* =====================================================================
-   คะแนน 7 ด้าน (0-100)
+   คะแนน 8 ด้าน (0-100)
    ===================================================================== */
 function computeScore(s) {
   const K = s.kpi, T = s.totals;
@@ -1128,6 +1128,7 @@ function computeScore(s) {
     custSat: s.custSat,
     staffSat: s.staffSat,
     growerSat: s.growerTrust,
+    safety: s.safety ?? 90,
     complaints: clamp(100 - complaintsTotal * 5, 0, 100),   // เดิม *7 → *5 : ร้องเรียน 1-2 ครั้งไม่ทำให้ S หลุด
     _profitValue: profit,
     _complaintsTotal: complaintsTotal,
@@ -1202,6 +1203,7 @@ function settleSeason(s) {
     custSat: s.score.custSat,
     staffSat: s.score.staffSat,
     growerSat: s.score.growerSat,
+    safety: s.score.safety,
     complaints: s.score.complaints,
   };
   const total = SCORE_SPEC.reduce((sum, sp) => sum + clamp(scores[sp.key] || 0, 0, 100) / 100 * sp.w, 0);   // 0–1000 ถ่วงน้ำหนัก
