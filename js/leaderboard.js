@@ -8,7 +8,7 @@
 const Leaderboard = {
   /* วาง URL ของ Google Apps Script Web App ที่ deploy แล้ว (ลงท้าย /exec)
      — เว้นว่างไว้ = ใช้เฉพาะในเครื่อง · ใส่ค่าแล้ว push = ทุกคนแข่งบนกระดานเดียวกัน */
-  SHEET_URL: '',
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbwzdhCqqK_7pd2dWFGuzANPWZKGGpHBSmrW7cNhmdZJ7sB4gSnCHtfppe2SSaXkHKkd-g/exec',
   _seq: 0,
 
   /* URL ที่ใช้จริง: ค่าที่ฝังในโค้ด หรือค่าที่ผู้เล่นวางเองในหน้าตั้งค่า (localStorage) */
