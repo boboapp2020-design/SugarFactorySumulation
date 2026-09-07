@@ -470,7 +470,7 @@ const EVENT_GROUPS = { cane: 'วัตถุดิบ', process: 'กระบ�
    เหตุฉุกเฉิน — ต้องตัดสินใจภายในเวลา ทีมฉุกเฉินลดเวลา/ค่าเสียหาย/โอกาสเกิด
    ===================================================================== */
 const EMERGENCIES = [
-  { id: 'plant_fire', icon: '🔥', name: 'ไฟไหม้ในโรงงาน', p: 0.013,
+  { id: 'plant_fire', icon: '🔥', name: 'ไฟไหม้ในโรงงาน', p: 0.013, safetyHit: 8,
     cause: 'ความร้อนสะสมในกองชานอ้อย + ประกายไฟจากสายพาน (ยิ่งเร่งหม้อไอน้ำยิ่งเสี่ยง)',
     fix: 'อัปเกรดทีมตอบสนองเหตุฉุกเฉิน · อย่ากองชานอ้อยสูงเกิน · ลดการเร่งหม้อไอน้ำ',
     cond: s => s.stock.bagasse > 600,
@@ -487,7 +487,7 @@ const EMERGENCIES = [
       { label: 'กันเชื้อเพลิงแล้วปล่อยให้ไหม้จนดับเอง', cost: 0, hours: 40, lossPct: 0.45, rep: -8, boilerDownH: 30, gov: 1,
         desc: 'ไม่เสียเงิน แต่ชานอ้อยหายเกือบครึ่ง หม้อไอน้ำหยุด 30 ชม. และถูกร้องเรียนเรื่องควัน' },
     ] },
-  { id: 'injury', icon: '🚑', name: 'อุบัติเหตุจากการทำงาน', p: 0.012,
+  { id: 'injury', icon: '🚑', name: 'อุบัติเหตุจากการทำงาน', p: 0.012, safetyHit: 14,
     cause: 'เร่งเครื่องต่อเนื่อง พนักงานล้า / การ์ดเครื่องจักรไม่ครบ',
     fix: 'ลดการเร่งเครื่อง · อัปเกรดทีม HR เพิ่มขวัญกำลังใจ · ซ่อมเครื่องที่ค่าพลังต่ำ',
     weight: s => (1 + overdriveLoad(s) * 1.2) * (s.staffSat < 50 ? 1.6 : 1) * (MACHINE_IDS.some(k => dPower(s, k) < 35) ? 1.4 : 1),
@@ -523,8 +523,62 @@ const EMERGENCIES = [
         desc: 'ลดระดับน้ำในบ่อ 35% ไม่ถูกร้องเรียน (ต้องมีทีมฉุกเฉิน)' },
       { label: 'จ้างรถดูดน้ำเสียออกไปกำจัด ฿1.6 ล้าน', cost: 1_600_000, hours: 6, rep: 0, water: -0.55,
         desc: 'แพงแต่ปลอดภัย ลดน้ำในบ่อ 55%' },
-      { label: 'ปล่อยลงลำน้ำสาธารณะ', cost: 0, hours: 1, rep: -12, water: -0.8, gov: 1, fine: 2_000_000, riskFine: 0.7,
-        desc: 'ผิดกฎหมาย — เสี่ยงถูกกรมโรงงานปรับ ฿2 ล้าน (70%) และถูกร้องเรียนภาครัฐ' },
+      { label: 'ปล่อยลงลำน้ำสาธารณะ', cost: 0, hours: 1, rep: -12, water: -0.8, gov: 1, fine: 2_000_000, riskFine: 0.7, riskShutdownH: 24,
+        desc: 'ผิดกฎหมาย — เสี่ยงถูกกรมโรงงานปรับ ฿2 ล้าน + สั่งหยุดโรงงาน 24 ชม. (70%) และถูกร้องเรียน' },
+    ] },
+
+  { id: 'boiler_incident', icon: '🌡️', name: 'หม้อไอน้ำแรงดันเกิน / ท่อรั่ว', p: 0.010, safetyHit: 12,
+    cause: 'เร่งหม้อไอน้ำต่อเนื่อง + ค่าพลังต่ำ + ขาดการตรวจสอบตามกฎหมายหม้อน้ำ (ต้องมีวิศวกรตรวจรับรอง)',
+    fix: 'ลดการเร่งหม้อไอน้ำ · ล้าง/ซ่อมตามรอบ · อัปเกรดทีมซ่อมบำรุง',
+    cond: s => dPower(s, 'boiler') < 92 || dOver(s, 'boiler').v > 1,
+    weight: s => (1 + Math.max(0, dOver(s, 'boiler').v - 1) * 3) * (1 + Math.max(0, (60 - dPower(s, 'boiler')) / 40)),
+    deadlineH: 2,
+    onStart: s => { s.emergency.station = 'boiler'; s.dept.boiler.downH = Math.max(s.dept.boiler.downH, 2); },
+    options: [
+      { label: 'หยุดหม้อทันที ซ่อม+ตรวจรับรองโดยวิศวกร', cost: 400_000, hours: 12, boilerDownH: 18, rep: +3, staff: +3,
+        desc: 'ถูกต้องตามกฎหมายหม้อน้ำ ปลอดภัย — เสียเวลา ~18 ชม.' },
+      { label: 'ลดแรงดันประคองเดินต่อ', cost: 80_000, hours: 2, rep: -5, riskFine: 0.4, fine: 3_000_000, riskShutdownH: 36, boilerDownH: 6, gov: 1,
+        desc: 'เร็ว แต่เสี่ยงระเบิด — ถ้าถูกตรวจ (40%) ปรับ ฿3 ล้าน + สั่งหยุด 36 ชม.' },
+    ] },
+
+  { id: 'confined_space', icon: '🫁', name: 'อุบัติเหตุที่อับอากาศ (ก๊าซ H₂S)', p: 0.008, safetyHit: 16,
+    cause: 'พนักงานลงล้างถังใส/ถังโมลาส/บ่อบำบัด ระหว่างซ่อมใหญ่ — ก๊าซ H₂S/ออกซิเจนต่ำ',
+    fix: 'ระบบใบอนุญาตเข้าที่อับอากาศ (permit) · ตรวจก๊าซก่อนเข้า · อัปเกรดทีมฉุกเฉิน',
+    weight: s => (dStar(s, 'ert') < 2 ? 1.8 : 1) * (1 + Math.max(0, (60 - (s.safety ?? 90)) / 60)),
+    deadlineH: 1,
+    onStart: s => { s.emergency.station = 'clar'; },
+    options: [
+      { label: 'หยุดงาน กู้ภัยตามระบบ + เครื่องช่วยหายใจ', cost: 250_000, hours: 6, stationDownH: 6, rep: +3, staff: +5,
+        desc: 'ถูกต้อง (permit-required entry) ช่วยชีวิตปลอดภัย พนักงานเชื่อมั่น' },
+      { label: 'สั่งเพื่อนลงไปช่วยทันที', cost: 30_000, hours: 1, rep: -8, riskFine: 0.55, fine: 3_500_000, riskShutdownH: 24, staff: -15, labourComplaint: 1,
+        desc: 'เสี่ยงเสียชีวิตซ้ำ (ผู้ช่วยเป็นเหยื่อรายที่ 2) ผิดกฎหมาย — ปรับ ฿3.5 ล้าน + หยุด 24 ชม. (55%)' },
+    ] },
+
+  { id: 'dust_explosion', icon: '💥', name: 'ฝุ่นชานอ้อย/น้ำตาลระเบิด', p: 0.007, safetyHit: 14,
+    cause: 'ฝุ่นสะสมที่จุดถ่ายเท + ประกายไฟ เกิด deflagration (มาตรฐาน NFPA 660)',
+    fix: 'ทำความสะอาดฝุ่นตามแผน · ระบบระงับการระเบิด · ลดการเร่งเครื่อง',
+    cond: s => s.stock.bagasse > 1000,
+    weight: s => (1 + Math.max(0, s.stock.bagasse - 3000) / 4000) * (1 + overdriveLoad(s) * 0.8),
+    deadlineH: 3,
+    onStart: s => { const k = MACHINE_IDS[Math.floor(Math.random() * MACHINE_IDS.length)]; s.emergency.station = k; s.dept[k].downH = Math.max(s.dept[k].downH, 3); },
+    options: [
+      { label: 'ระบบระงับการระเบิด + ล้างฝุ่นตามแผน', needTeam: 1, cost: 350_000, hours: 10, stationDownH: 12, rep: +2, staff: +3,
+        desc: 'ควบคุมได้ตามมาตรฐาน ป้องกันซ้ำ (ต้องมีทีมฉุกเฉิน)' },
+      { label: 'ทำความสะอาดเองแบบเร่ง', cost: 100_000, hours: 4, rep: -6, riskFine: 0.4, fine: 2_500_000, riskShutdownH: 24, gov: 1,
+        desc: 'เร็ว แต่เสี่ยงระเบิดซ้ำ — ถ้าถูกตรวจ (40%) ปรับ ฿2.5 ล้าน + หยุด 24 ชม.' },
+    ] },
+
+  { id: 'so2_leak', icon: '☁️', name: 'ก๊าซ SO₂ รั่วที่หม้อรมซัลเฟอร์', p: 0.008, safetyHit: 10,
+    cause: 'การจัดการกำมะถัน/หม้อรมซัลเฟอร์ (sulphitation) ในขั้นทำใส — SO₂ รั่ว',
+    fix: 'ตรวจวาล์ว/ท่อ SO₂ ตามรอบ · PPE หน้ากากกันไอกรด · อัปเกรดทีมฉุกเฉิน',
+    weight: s => (dStar(s, 'ert') < 2 ? 1.5 : 1) * (1 + Math.max(0, dOver(s, 'clar').v - 1) * 1.5),
+    deadlineH: 2,
+    onStart: s => { s.emergency.station = 'clar'; },
+    options: [
+      { label: 'อพยพ ปิดวาล์ว ซ่อมตามระบบ', cost: 200_000, hours: 6, stationDownH: 8, rep: +2, staff: +3,
+        desc: 'ปลอดภัยตามมาตรฐาน — หยุดหม้อใส 8 ชม.' },
+      { label: 'ปิดจมูกทำต่อ', cost: 40_000, hours: 2, rep: -5, riskFine: 0.45, fine: 2_000_000, riskShutdownH: 18, staff: -10, labourComplaint: 1,
+        desc: 'เสี่ยงพนักงานสูดก๊าซพิษ ผิดกฎหมาย — ปรับ ฿2 ล้าน + หยุด 18 ชม. (45%)' },
     ] },
 ];
 

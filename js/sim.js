@@ -673,7 +673,7 @@ function emergencyTick(s, h) {
 function startEmergency(s, def) {
   s.emergency = { id: def.id, name: def.name, icon: def.icon, cause: def.cause, startDay: s.day, elapsedH: 0, deadlineH: def.deadlineH, choice: null, resolveAtH: 0, loss: 0, shown: false, station: null };
   if (def.onStart) def.onStart(s);
-  if (def.id === 'injury' || def.id === 'plant_fire') s.safety = clamp((s.safety ?? 90) - (def.id === 'injury' ? 14 : 8), 0, 100);   // เกิดเหตุ = สถิติความปลอดภัยเสีย
+  if (def.safetyHit) s.safety = clamp((s.safety ?? 90) - def.safetyHit, 0, 100);   // เกิดเหตุด้านความปลอดภัย = สถิติเสีย
   logMsg(s, `🚨 เหตุฉุกเฉิน: ${def.name} — ${def.cause}`, 'bad');
 }
 function chooseEmergency(s, i, auto = false) {
