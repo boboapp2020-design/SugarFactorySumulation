@@ -539,13 +539,21 @@ function runHours(s, h) {
     const net = take - lost;
     const space2 = Math.max(0, P.whCap - s.stock.sugar);
     const stored = Math.min(net, space2);
-    t.overflow += net - stored;
-    s.stock.sugar += stored; s.rawSugar -= take;
+    /* น้ำตาลที่ผลิตใหม่เข้าคลังที่อายุ 0 → เกลี่ยอายุเฉลี่ยของกองให้สดขึ้น (turnover ดี = อายุต่ำ) */
+    if (stored > 0) { const prev = s.stock.sugar; s.stock.sugar += stored; s.sugarAge = (prev * (s.sugarAge || 0)) / Math.max(1, s.stock.sugar); }
+    s.rawSugar -= take;
+    /* คลังเต็ม: น้ำตาลส่วนเกินขายเลหลัง (fire-sale) ที่ 80% ราคา แทนที่จะหายวับ — คลังเต็มจึงเสียมาร์จิ้น ไม่ใช่เสียของ */
+    const surplus = net - stored;
+    if (surplus > 0) {
+      const fireP = Math.round(s.market.sugarPrice * up(s, 'sales', 'priceMult') * 0.80);
+      const rev = surplus * fireP; s.cash += rev; s.pendingSales = (s.pendingSales || 0) + rev; s.totals.revenue += rev; s.totals.revSugar += rev;
+      t.overflow += surplus;
+      if (rnd() < 0.05) logMsg(s, `🚨 คลังเต็ม — ขายเลหลังน้ำตาลล้น ${fmt(Math.round(surplus))} ต. ที่ 80% ราคา (เสียมาร์จิ้น) · อัปเกรดคลัง/เร่งขาย`, 'bad');
+    }
     t.packed += net; t.packLoss += lost;
     s.totals.polSugar -= lost * CONFIG.ptyASugar / 100 * 0.996;      // น้ำตาลที่หกหายไม่นับเป็นผลผลิต
     s.totals.sugar -= lost;
     if (take > 0) wear(s, 'pack', h, take / Math.max(0.1, capH));
-    if (t.overflow > 0 && rnd() < 0.05) logMsg(s, `🚨 คลังเต็ม น้ำตาลล้น ${fmt(t.overflow)} ตัน`, 'bad');
   }
 
   /* ---------------- 6. หม้อไอน้ำ + ไฟฟ้า ---------------- */
@@ -888,6 +896,18 @@ function endOfDay(s) {
   const fixMul = dv(s, 'qc', 'fix'); const closeChance = (1 - (fixMul == null ? 1 : fixMul)) * 0.6;
   if (s.complaints.customer > 0 && rnd() < closeChance) { s.complaints.customer--; logMsg(s, '✅ ทีมคุณภาพปิดข้อร้องเรียนลูกค้าได้ 1 เรื่อง', 'good'); }
 
+  /* ---------- น้ำตาลเก็บนานในคลัง = จับก้อน/สีขึ้น (WMS/FIFO ดาวสูง = เริ่มช้ากว่า) ---------- */
+  if (s.stock.sugar > 1) {
+    s.sugarAge = (s.sugarAge || 0) + 1;
+    const cakeStart = 20 + dStar(s, 'wh') * 6;                  // ดาวสูง (WMS/บาร์โค้ด/FIFO) = จับก้อนช้ากว่า
+    if (s.sugarAge > cakeStart) {
+      const cakeLoss = s.stock.sugar * clamp((s.sugarAge - cakeStart) * 0.004, 0, 0.03);   // ค่อย ๆ จับก้อน สูงสุด 3%/วัน
+      s.stock.sugar -= cakeLoss; s.totals.sugar -= cakeLoss;
+      s.totals.cakeLoss = (s.totals.cakeLoss || 0) + cakeLoss;
+      if (cakeLoss > 5 && rnd() < 0.35) logMsg(s, `📦 น้ำตาลเก็บนาน (${Math.round(s.sugarAge)} วัน) จับก้อน เสีย ${fmt(Math.round(cakeLoss))} ต. — เร่งขาย/อัปเกรดคลัง (FIFO)`, 'bad');
+    }
+  } else s.sugarAge = 0;
+
   /* ---------- ปรับความพึงพอใจ 3 ฝ่ายตามปัจจัยที่กำหนด ---------- */
   updateSatisfaction(s, t);
   if (s.staffSat < 35 && rnd() < 0.25) { s.complaints.labour++; logMsg(s, '📣 พนักงานยื่นข้อร้องเรียนเรื่องภาระงาน', 'bad'); }
@@ -920,14 +940,15 @@ function endOfDay(s) {
   for (const o of s.orders) {
     if (o.status === 'open' && s.day >= o.expires) o.status = 'expired';
     if (o.status === 'accepted' && s.day >= o.deadline) {
-      if (s.stock.sugar >= o.tons) { deliverOrder(s, o.id); continue; }
-      const pen = Math.round(o.tons * o.price * 0.08);
+      const remain = o.tons - (o.delivered || 0);
+      if (s.stock.sugar >= remain && shipLeft(s) >= remain) { deliverOrder(s, o.id); if (o.status === 'delivered') continue; }
+      const pen = Math.round(remain * o.price * 0.08);   // ค่าปรับตามส่วนที่ยังส่งไม่ครบ (ส่งบางส่วนแล้วปรับน้อยลง)
       pay(s, pen, 'penalty');
       s.reputation = clamp(s.reputation - 8, 0, 100);
       s.custSat = clamp(s.custSat - 9, 0, 100);
       s.complaints.customer++;
       s.totals.ordersFailed++; o.status = 'failed';
-      logMsg(s, `❌ ส่ง ${o.id} ไม่ทัน ค่าปรับ ฿${fmt(pen)} · ความพึงพอใจลูกค้า −9 · ข้อร้องเรียน +1`, 'bad');
+      logMsg(s, `❌ ส่ง ${o.id} ไม่ครบ (ขาด ${fmt(Math.round(remain))} ต.) ค่าปรับ ฿${fmt(pen)} · ลูกค้า −9 · ข้อร้องเรียน +1`, 'bad');
     }
   }
   if (rnd() < CONFIG.orderChancePerDay * up(s, 'sales', 'orderRate') * (s.orderRateMult || 1) * (0.6 + s.reputation / 120)) createOrder(s);
@@ -1381,16 +1402,25 @@ function ship(s, tons) { s.todayShipped = (s.todayShipped || 0) + tons; }
 
 function deliverOrder(s, id) {
   const o = s.orders.find(x => x.id === id);
-  if (!o || o.status !== 'accepted' || s.stock.sugar < o.tons) { toast('น้ำตาลในคลังไม่พอ'); return; }
-  if (shipLeft(s) < o.tons) { toast(`วันนี้โหลดรถได้อีกแค่ ${fmt(Math.floor(shipLeft(s)))} ตัน — อัปเกรดโกดังและท่าโหลด`); return; }
-  ship(s, o.tons);
-  s.stock.sugar -= o.tons;
-  const rev = o.tons * o.price;
+  if (!o || o.status !== 'accepted') { toast('ออร์เดอร์นี้ส่งไม่ได้'); return; }
+  const remain = o.tons - (o.delivered || 0);
+  /* ส่งได้เท่าที่มี: ทยอยส่งข้ามวันได้ (ไม่ใช่ all-or-nothing) จำกัดด้วยคลัง+กำลังโหลดวันนี้ */
+  const canShip = Math.min(remain, s.stock.sugar, shipLeft(s));
+  if (canShip < 1) { toast(s.stock.sugar < 1 ? 'น้ำตาลในคลังไม่พอ' : 'วันนี้โหลดรถเต็มแล้ว — เหลือส่งต่อพรุ่งนี้ได้'); return; }
+  ship(s, canShip);
+  s.stock.sugar -= canShip;
+  const rev = canShip * o.price;
   s.cash += rev; s.pendingSales = (s.pendingSales || 0) + rev; s.totals.revenue += rev;
-  s.totals.ordersDone++; o.status = 'delivered'; s.todayDelivered = (s.todayDelivered || 0) + 1;
-  s.reputation = clamp(s.reputation + (o.urgent ? 7 : 4), 0, 100);
-  s.custSat = clamp(s.custSat + (o.urgent ? 4 : 3), 0, 100);   // ส่งมอบทันเวลา = ลูกค้าพอใจขึ้นทันที
-  logMsg(s, `✅ ส่ง ${o.id} ${fmt(o.tons)} ตัน รับ ฿${fmt(rev)} · ลูกค้าพอใจ +${o.urgent ? 4 : 3}`, 'good');
+  o.delivered = (o.delivered || 0) + canShip;
+  s.todayDelivered = (s.todayDelivered || 0) + 1;
+  if (o.delivered >= o.tons - 0.5) {   // ครบแล้ว
+    s.totals.ordersDone++; o.status = 'delivered';
+    s.reputation = clamp(s.reputation + (o.urgent ? 7 : 4), 0, 100);
+    s.custSat = clamp(s.custSat + (o.urgent ? 4 : 3), 0, 100);   // ส่งครบตรงเวลา = ลูกค้าพอใจ
+    logMsg(s, `✅ ส่งครบ ${o.id} ${fmt(o.tons)} ตัน · ลูกค้าพอใจ +${o.urgent ? 4 : 3}`, 'good');
+  } else {
+    logMsg(s, `📦 ส่งบางส่วน ${o.id} ${fmt(Math.round(canShip))} ต. (สะสม ${fmt(Math.round(o.delivered))}/${fmt(o.tons)}) รับ ฿${fmt(Math.round(rev))}`, 'info');
+  }
 }
 function sellMolasses(s, tons) {
   tons = clamp(Math.floor(tons), 0, s.stock.molasses);

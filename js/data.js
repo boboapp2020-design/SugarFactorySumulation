@@ -742,7 +742,7 @@ function createInitialState() {
     yard: { lots: [], rejected: 0, queueTons: 0, queueH: 0 },
     field: { standing: 0 },      // อ้อยที่หาไว้แล้วแต่ยังไม่ได้ตัด (ตัน)
     buf: { mj: { m: 0, B: 0, P: 0 }, cj: { m: 0, B: 0, P: 0 }, syrup: { m: 0, B: 0, P: 0 } },
-    rawSugar: 0,
+    rawSugar: 0, sugarAge: 0,
     stock: { sugar: 0, molasses: 0, bagasse: 1500, oil: 0 },
     market: { sugarPrice: CONFIG.sugarBasePrice, molPrice: CONFIG.molassesPrice, canePriceMult: 1.0, pressure: 0 },
 
