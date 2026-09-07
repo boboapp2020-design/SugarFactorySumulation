@@ -1,0 +1,9 @@
+# ไฟล์ตัวอย่าง/สคริปต์ dev ที่ไม่ต้องขึ้นเว็บ
+sample.png
+start-game.bat
+serve.ps1
+assets/factory-map-sample-DISABLED.png
+assets/New folder (2)/
+# เกมวาดฉากด้วย SVG อยู่แล้ว รูปอาคารขนาดใหญ่ไม่จำเป็น — เก็บแค่ hero.png สำหรับหน้าแรก
+assets/Building/*.png
+!assets/Building/hero.png
