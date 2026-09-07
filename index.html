@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sugar Factory Manager — เกมบริหารโรงงานน้ำตาล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="app">
+<div id="stage">
+
+  <!-- ============ แผนที่โรงงาน ============ -->
+  <div id="map">
+  <div id="world">
+    <!-- ถ้ามีภาพวาดของคุณที่ assets/factory-map.png (1536x1024) เกมจะใช้แทนฉากในตัว -->
+    <img id="mapImg" data-src="assets/Building/%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%94%E0%B8%B4%E0%B8%99.png" alt="" draggable="false"
+         onload="document.getElementById('mapSvg').style.display='none'"
+         onerror="this.style.display='none'">
+    <!-- อาคารที่ประกอบจาก assets/Building (scene.js) -->
+    <div id="buildings"></div>
+
+    <!-- ฉากโรงงานในตัวเกม: พื้น/ถนน วาดที่นี่ ส่วนอาคาร-ถัง-ต้นไม้ สร้างด้วย fx.js -->
+    <svg id="mapSvg" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8cc154"/><stop offset="1" stop-color="#5d9631"/></linearGradient>
+        <pattern id="pCane" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="rotate(-28)">
+          <rect width="26" height="26" fill="#6ea63a"/><rect width="26" height="11" fill="#83c04a"/><rect y="19" width="26" height="3" fill="#4e8628" opacity=".55"/>
+        </pattern>
+        <pattern id="pCane2" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(62)">
+          <rect width="22" height="22" fill="#7cb340"/><rect width="22" height="9" fill="#93cb55"/>
+        </pattern>
+        <linearGradient id="gWater" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86d6f2"/><stop offset=".5" stop-color="#42a3d6"/><stop offset="1" stop-color="#2a7cb2"/></linearGradient>
+        <linearGradient id="gSlab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcdfe1"/><stop offset="1" stop-color="#b9bfc4"/></linearGradient>
+        <radialGradient id="gSun" cx=".78" cy=".08" r=".85"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset=".45" stop-color="#ffe9a8" stop-opacity=".16"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="gVig" cx=".5" cy=".45" r=".78"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#0a1a25" stop-opacity=".38"/></radialGradient>
+        <radialGradient id="gTree"><stop offset="0" stop-color="#79cf52"/><stop offset=".65" stop-color="#419230"/><stop offset="1" stop-color="#276b1f"/></radialGradient>
+        <radialGradient id="gPile" cx=".4" cy=".3"><stop offset="0" stop-color="#f0cf8d"/><stop offset=".6" stop-color="#cb9d55"/><stop offset="1" stop-color="#95692c"/></radialGradient>
+        <filter id="fShadow" x="-40%" y="-30%" width="190%" height="210%"><feDropShadow dx="10" dy="20" stdDeviation="12" flood-color="#0a1a28" flood-opacity=".34"/></filter>
+        <filter id="fShadowSm" x="-50%" y="-40%" width="210%" height="230%"><feDropShadow dx="5" dy="10" stdDeviation="6" flood-color="#0a1a28" flood-opacity=".36"/></filter>
+        <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3c4d6" stop-opacity=".30"/><stop offset=".55" stop-color="#b3c4d6" stop-opacity=".06"/><stop offset="1" stop-color="#b3c4d6" stop-opacity="0"/></linearGradient>
+        <radialGradient id="gWarm" cx=".82" cy=".18" r=".95"><stop offset="0" stop-color="#ffd08a" stop-opacity=".26"/><stop offset=".5" stop-color="#ffb060" stop-opacity=".08"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient>
+      </defs>
+
+      <!-- ---------- พื้นดิน / ไร่อ้อย ---------- -->
+      <rect width="1536" height="1024" fill="url(#gGround)"/>
+      <rect width="1536" height="1024" fill="url(#pCane)" opacity=".8"/>
+      <path d="M0 0 H1536 V150 C1200 190, 900 120, 620 170 S 160 130, 0 175 Z" fill="url(#pCane2)" opacity=".85"/>
+      <path d="M0 620 C 150 606, 250 700, 300 830 L 300 1024 L 0 1024 Z" fill="url(#pCane2)" opacity=".6"/>
+      <path d="M1440 200 C 1500 320, 1520 520, 1536 640 L1536 200 Z" fill="url(#pCane2)" opacity=".5"/>
+
+      <!-- ---------- แม่น้ำ ---------- -->
+      <path d="M1150 0 C 1270 44, 1420 26, 1536 66 L1536 186 C 1400 166, 1250 148, 1130 92 Z" fill="url(#gWater)"/>
+      <path d="M1150 0 C 1270 44, 1420 26, 1536 66" fill="none" stroke="#c7ecfa" stroke-width="8" opacity=".6"/>
+      <g stroke="#d8f2fd" stroke-width="3" fill="none" opacity=".45">
+        <path d="M1230 60 q26 -12 52 0"/><path d="M1330 82 q26 -12 52 0"/><path d="M1430 110 q26 -12 52 0"/>
+      </g>
+
+      <!-- ---------- ถนนใหญ่ ---------- -->
+      <path d="M-40 1010 C 260 940, 520 900, 900 862 S 1340 820, 1580 782" stroke="#5f6367" stroke-width="92" fill="none"/>
+      <path d="M-40 1010 C 260 940, 520 900, 900 862 S 1340 820, 1580 782" stroke="#868b90" stroke-width="80" fill="none"/>
+      <path d="M-40 1010 C 260 940, 520 900, 900 862 S 1340 820, 1580 782" stroke="#f5dc86" stroke-width="4" stroke-dasharray="36 28" fill="none" opacity=".9"/>
+      <!-- ถนนเข้าโรงงาน (เส้นทางรถอ้อย) -->
+      <path d="M-90 980 C 60 930, 150 880, 210 800 C 250 748, 250 700, 250 640 C 255 580, 300 550, 380 540 C 440 532, 480 530, 540 528" stroke="#6c7074" stroke-width="66" fill="none" stroke-linecap="round"/>
+      <path d="M-90 980 C 60 930, 150 880, 210 800 C 250 748, 250 700, 250 640 C 255 580, 300 550, 380 540 C 440 532, 480 530, 540 528" stroke="#90959a" stroke-width="56" fill="none" stroke-linecap="round"/>
+      <!-- ถนนวงในโรงงาน -->
+      <g stroke="#a4aaaf" stroke-width="28" fill="none" stroke-linecap="round">
+        <path d="M470 486 H 1340"/><path d="M640 612 H 1300"/><path d="M470 830 H 1360"/><path d="M1352 470 V 840"/><path d="M420 500 V 850"/>
+      </g>
+      <g stroke="#e8ebed" stroke-width="2.5" stroke-dasharray="16 16" fill="none" opacity=".55">
+        <path d="M470 486 H 1340"/><path d="M470 830 H 1360"/><path d="M1352 470 V 840"/>
+      </g>
+      <path d="M1440 860 C 1490 890, 1540 910, 1600 936" stroke="#90959a" stroke-width="54" fill="none" stroke-linecap="round"/>
+
+      <!-- ---------- พื้นคอนกรีตโรงงาน ---------- -->
+      <path d="M400 300 L 1512 262 L 1528 968 L 380 1000 Z" fill="url(#gSlab)" opacity=".9"/>
+      <path d="M400 300 L 1512 262 L 1528 968 L 380 1000 Z" fill="none" stroke="#98a0a7" stroke-width="3"/>
+
+      <!-- ---------- ลานอ้อย ---------- -->
+      <rect x="52" y="518" width="308" height="200" rx="14" fill="#ab7c42" filter="url(#fShadowSm)"/>
+      <rect x="52" y="518" width="308" height="200" rx="14" fill="none" stroke="#875c2a" stroke-width="4"/>
+      <g stroke="#96693a" stroke-width="2" opacity=".5"><path d="M52 578 h308 M52 638 h308 M52 690 h308"/></g>
+
+      <!-- ---------- บ่อบำบัดน้ำเสีย ---------- -->
+      <g filter="url(#fShadowSm)">
+        <rect x="1374" y="420" width="116" height="66" rx="10" fill="url(#gWater)" stroke="#8ec6e2" stroke-width="4"/>
+        <rect x="1446" y="460" width="106" height="62" rx="10" fill="url(#gWater)" stroke="#8ec6e2" stroke-width="4"/>
+      </g>
+      <g stroke="#cdeefb" stroke-width="3" opacity=".5" fill="none"><path d="M1390 456 q22 -10 44 0 t44 0"/><path d="M1462 496 q22 -10 44 0 t44 0"/></g>
+
+      <!-- ---------- ลานจอดรถ / ลานขนส่ง ---------- -->
+      <rect x="238" y="792" width="122" height="70" rx="6" fill="#94999e"/>
+      <g stroke="#eceff1" stroke-width="2.5"><path d="M270 794 v66 M300 794 v66 M330 794 v66"/></g>
+      <rect x="1300" y="808" width="220" height="96" rx="8" fill="#94999e"/>
+      <g stroke="#eceff1" stroke-width="2.5"><path d="M1344 810 v92 M1398 810 v92 M1452 810 v92"/></g>
+
+      <!-- ---------- ท่อสายการผลิต (ผังใหม่: ลาน→หีบ→ทำใส→ต้ม→เคี่ยว / เคี่ยว→ปั่น→บรรจุ→คลัง / หีบ→กากอ้อย→หม้อไอน้ำ) ---------- -->
+      <g fill="none" stroke="#7f8a92" stroke-width="14" stroke-linecap="round" opacity=".95">
+        <path d="M620 552 Q 654 546 686 548"/><path d="M760 548 Q 800 546 838 546"/><path d="M1072 548 Q 1090 552 1108 556"/><path d="M1176 568 Q 1120 620 1060 650"/><path d="M1100 720 Q 1140 730 1178 740"/><path d="M1260 780 Q 1300 790 1330 796"/><path d="M500 490 Q 470 440 452 376"/><path d="M470 348 Q 500 344 524 342"/><path d="M760 336 Q 790 332 826 332"/>
+      </g>
+      <g fill="none" stroke="#cad3d9" stroke-width="6" stroke-linecap="round">
+        <path d="M620 552 Q 654 546 686 548"/><path d="M760 548 Q 800 546 838 546"/><path d="M1072 548 Q 1090 552 1108 556"/><path d="M1176 568 Q 1120 620 1060 650"/><path d="M1100 720 Q 1140 730 1178 740"/><path d="M1260 780 Q 1300 790 1330 796"/><path d="M500 490 Q 470 440 452 376"/><path d="M470 348 Q 500 344 524 342"/><path d="M760 336 Q 790 332 826 332"/>
+      </g>
+
+      <!-- ---------- อาคาร ถัง ต้นไม้ (สร้างด้วย fx.js) ---------- -->
+      <g id="scenery"></g>
+      <!-- ---------- ของที่ขยับได้ในฉาก: สายพาน เครื่องเติมอากาศ คนงาน ธง นก ---------- -->
+      <g id="sceneryAnim"></g>
+
+      <!-- ---------- ป้ายโรงงาน ---------- -->
+      <g filter="url(#fShadow)" transform="translate(452 700) scale(.86)">
+        <rect width="336" height="104" rx="10" fill="#f5ead2" stroke="#8a6a3d" stroke-width="5"/>
+        <rect x="12" y="12" width="312" height="80" rx="6" fill="none" stroke="#c9ae7d" stroke-width="2"/>
+        <text x="168" y="52" text-anchor="middle" font-family="Kanit, sans-serif" font-size="31" font-weight="700" fill="#5b3f1f">โรงงานน้ำตาล</text>
+        <text x="168" y="80" text-anchor="middle" font-family="Kanit, sans-serif" font-size="15" fill="#8a6a3d">Sugar for a Better Tomorrow</text>
+      </g>
+
+      <!-- ---------- แสงแดด / โทนสีตามเวลา ---------- -->
+      <rect width="1536" height="420" fill="url(#gHaze)" pointer-events="none"/><!-- หมอกไกล = ความลึก -->
+      <rect id="warmLight" width="1536" height="1024" fill="url(#gWarm)" pointer-events="none" style="mix-blend-mode:screen" opacity=".8"/><!-- แสงแดดอุ่นจากทิศดวงอาทิตย์ -->
+      <rect id="sunGlow" width="1536" height="1024" fill="url(#gSun)" pointer-events="none" opacity=".55"/>
+      <rect id="nightTint" width="1536" height="1024" fill="#12224a" pointer-events="none" opacity="0"/>
+      <!-- ---------- ไฟอาคาร/ไฟถนนตอนกลางคืน (อยู่เหนือโทนมืด) ---------- -->
+      <g id="nightLights" opacity="0" style="mix-blend-mode:screen" pointer-events="none"></g>
+      <rect width="1536" height="1024" fill="url(#gVig)" pointer-events="none"/>
+    </svg>
+
+    <!-- ============ ชั้นแอนิเมชัน ============ -->
+    <svg id="fx" viewBox="0 0 1536 1024" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="smokeG"><stop offset="0" stop-color="#ffffff" stop-opacity=".82"/><stop offset=".5" stop-color="#eef2f7" stop-opacity=".42"/><stop offset="1" stop-color="#dfe6ee" stop-opacity="0"/></radialGradient>
+        <path id="truckIn"  d="M -90 900 C 60 830, 130 700, 175 600 C 210 520, 260 470, 330 440 C 400 412, 460 400, 520 388"/>
+        <path id="truckOut" d="M 520 420 C 440 436, 370 452, 300 490 C 230 528, 180 610, 140 700 C 100 790, 40 880, -90 960"/>
+        <path id="shipOut"  d="M 1300 800 C 1360 830, 1420 862, 1500 900 C 1560 928, 1600 950, 1660 980"/>
+        <path id="f_cane"   d="M 340 452 Q 380 438 420 426"/>
+        <path id="f_mill"   d="M 620 428 Q 660 424 698 432"/>
+        <path id="f_clar"   d="M 802 432 Q 826 430 850 432"/>
+        <path id="f_evap"   d="M 1092 430 Q 1116 432 1140 436"/>
+        <path id="f_pan"    d="M 1236 482 Q 1170 560 1100 606"/>
+        <path id="f_cent"   d="M 1100 650 Q 1150 672 1200 700"/>
+        <path id="f_pack"   d="M 1206 704 Q 1256 716 1306 728"/>
+        <path id="f_wh"     d="M 1310 730 Q 1360 740 1410 750"/>
+        <path id="f_bag"    d="M 545 302 Q 520 270 486 252"/>
+        <path id="f_boiler" d="M 500 240 Q 550 236 596 232"/>
+        <path id="f_steam"  d="M 800 200 Q 830 196 858 200"/>
+        <!-- มัดลำอ้อยเข้าโรงงาน (แทนรถบรรทุก) -->
+        <g id="caneBundle">
+          <ellipse cx="0" cy="13" rx="30" ry="5" fill="#0d2030" opacity=".25"/>
+          <g stroke="#b7d94a" stroke-width="5" stroke-linecap="round"><line x1="-28" y1="9" x2="26" y2="-3"/><line x1="-26" y1="3" x2="28" y2="-9"/><line x1="-24" y1="-3" x2="30" y2="-13"/><line x1="-27" y1="15" x2="27" y2="3"/></g>
+          <g stroke="#7fa933" stroke-width="1.6"><line x1="-12" y1="6" x2="-12" y2="-6"/><line x1="4" y1="2" x2="4" y2="-10"/><line x1="16" y1="-1" x2="16" y2="-12"/></g>
+          <path d="M26 -3 q10 -12 22 -10 M28 -9 q8 -12 20 -12 M30 -13 q6 -10 16 -14 M27 3 q12 -6 22 -2" stroke="#5fb84a" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="-5" y="-11" width="9" height="28" rx="2.5" fill="#8a5a2b"/>
+        </g>
+        <g id="caneMini" transform="scale(.45)"><g stroke="#b7d94a" stroke-width="5" stroke-linecap="round"><line x1="-28" y1="9" x2="26" y2="-3"/><line x1="-26" y1="3" x2="28" y2="-9"/><line x1="-24" y1="-3" x2="30" y2="-13"/></g><path d="M26 -3 q10 -12 22 -10 M28 -9 q8 -12 20 -12" stroke="#5fb84a" stroke-width="3" fill="none"/><rect x="-4" y="-10" width="8" height="22" rx="2" fill="#8a5a2b"/></g>
+        <g id="truckSprite">
+          <rect x="-30" y="10" width="10" height="7" fill="#1c2026"/>
+          <rect x="-34" y="-16" width="52" height="26" rx="4" fill="#3a7d3a"/>
+          <path d="M-34 -16 l5 -13 h42 l5 13 z" fill="#8cc152"/>
+          <g stroke="#6d9a30" stroke-width="1.5"><path d="M-28 -22 h40 M-28 -18 h40"/></g>
+          <rect x="14" y="-27" width="3.5" height="12" rx="1.5" fill="#5a636b"/>
+          <rect x="18" y="-10" width="21" height="20" rx="4" fill="#f0a830"/>
+          <rect x="22" y="-7" width="11" height="8" rx="1.5" fill="#c9e9fb"/>
+          <rect x="38" y="-9" width="4" height="2.5" rx="1" fill="#2a2e33"/>
+          <circle cx="38.5" cy="6" r="2.1" fill="#ffe9a8"/>
+          <circle cx="-22" cy="12" r="6.5" fill="#242628"/><circle cx="4" cy="12" r="6.5" fill="#242628"/><circle cx="29" cy="12" r="6.5" fill="#242628"/>
+          <circle cx="-22" cy="12" r="2.6" fill="#5b636b"/><circle cx="4" cy="12" r="2.6" fill="#5b636b"/><circle cx="29" cy="12" r="2.6" fill="#5b636b"/>
+        </g>
+        <g id="tankerTruck">
+          <rect x="-30" y="10" width="10" height="7" fill="#1c2026"/>
+          <rect x="-33" y="-14" width="50" height="20" rx="10" fill="#c7ccd2"/>
+          <ellipse cx="-33" cy="-4" rx="4" ry="10" fill="#aeb4bb"/>
+          <g stroke="#9aa1a8" stroke-width="1.2"><path d="M-20 -14 v20 M-6 -14 v20 M8 -14 v20"/></g>
+          <rect x="-14" y="-17" width="8" height="4" rx="1.5" fill="#8b6a3c"/>
+          <rect x="14" y="-25" width="3.2" height="11" rx="1.5" fill="#5a636b"/>
+          <rect x="18" y="-10" width="20" height="20" rx="4" fill="#7a4e28"/>
+          <rect x="22" y="-7" width="10" height="8" rx="1.5" fill="#c9e9fb"/>
+          <circle cx="37.5" cy="6" r="2" fill="#ffe9a8"/>
+          <circle cx="-22" cy="12" r="6.5" fill="#242628"/><circle cx="4" cy="12" r="6.5" fill="#242628"/><circle cx="29" cy="12" r="6.5" fill="#242628"/>
+          <circle cx="-22" cy="12" r="2.6" fill="#5b636b"/><circle cx="4" cy="12" r="2.6" fill="#5b636b"/><circle cx="29" cy="12" r="2.6" fill="#5b636b"/>
+        </g>
+        <g id="truckEmpty">
+          <rect x="-34" y="-14" width="52" height="24" rx="4" fill="#3a7d3a"/>
+          <rect x="-30" y="-10" width="44" height="14" rx="2" fill="#2c5f2c"/>
+          <rect x="18" y="-10" width="21" height="20" rx="4" fill="#f0a830"/>
+          <rect x="22" y="-7" width="11" height="8" rx="1.5" fill="#c9e9fb"/>
+          <circle cx="-22" cy="12" r="6.5" fill="#242628"/><circle cx="4" cy="12" r="6.5" fill="#242628"/><circle cx="29" cy="12" r="6.5" fill="#242628"/>
+        </g>
+        <g id="sugarTruck">
+          <rect x="-30" y="10" width="10" height="7" fill="#1c2026"/>
+          <rect x="-34" y="-18" width="52" height="28" rx="4" fill="#eef2f5"/>
+          <rect x="-30" y="-14" width="44" height="10" rx="2" fill="#ffffff" opacity=".8"/>
+          <rect x="-30" y="-2" width="44" height="8" rx="2" fill="#d4dde4"/>
+          <line x1="-8" y1="-18" x2="-8" y2="10" stroke="#c2ccd4" stroke-width="1.4"/>
+          <rect x="14" y="-27" width="3.5" height="12" rx="1.5" fill="#5a636b"/>
+          <rect x="18" y="-10" width="21" height="20" rx="4" fill="#2c6fb0"/>
+          <rect x="22" y="-7" width="11" height="8" rx="1.5" fill="#c9e9fb"/>
+          <rect x="38" y="-9" width="4" height="2.5" rx="1" fill="#1e2a38"/>
+          <circle cx="38.5" cy="6" r="2.1" fill="#ffe9a8"/>
+          <circle cx="-22" cy="12" r="6.5" fill="#242628"/><circle cx="4" cy="12" r="6.5" fill="#242628"/><circle cx="29" cy="12" r="6.5" fill="#242628"/>
+          <circle cx="-22" cy="12" r="2.6" fill="#5b636b"/><circle cx="4" cy="12" r="2.6" fill="#5b636b"/><circle cx="29" cy="12" r="2.6" fill="#5b636b"/>
+        </g>
+      </defs>
+      <g id="fxSmoke"></g><g id="fxSteam"></g><g id="fxFlow"></g><g id="fxTrucks"></g><g id="fxSpark"></g>
+    </svg>
+
+    <div id="markers"></div>
+  </div><!-- /world -->
+    <div id="dayFlash"></div>
+    <div id="floats"></div>
+  </div>
+
+  <!-- ============ HUD ด้านบน ============ -->
+  <header id="hud">
+    <div class="logo">
+      <div class="logo-text"><span class="l1">Sugar Factory</span><span class="l2">Manager</span><span class="l3">สร้างอนาคตจากความหวาน</span></div>
+    </div>
+    <div class="chips" id="hudChips"></div>
+    <div class="hud-icons">
+      <button class="icon-btn" data-action="goHome" title="กลับหน้าแรก">🏠</button>
+      <button class="icon-btn" id="btnMusic" data-action="music" title="เพลง/เสียง">🔊</button>
+      <button class="icon-btn" data-action="fullscreen" title="เต็มจอ (F11)">⛶</button>
+      <button class="icon-btn" data-action="tab" data-tab="settings" title="ตั้งค่า">⚙️</button>
+      <button class="icon-btn" data-action="tutorial" title="คู่มือ">📖</button>
+      <button class="icon-btn" data-action="tab" data-tab="advisor" title="แจ้งเตือน">🔔<span class="badge" id="hintBadge"></span></button>
+    </div>
+  </header>
+
+  <!-- ============ ภารกิจ ============ -->
+  <aside id="missions">
+    <h3>🏅 เควส <span class="sum"></span><button class="mini" data-action="toggleMissions" title="ย่อ/ขยาย">▾</button></h3>
+    <ul id="missionList"></ul>
+  </aside>
+
+  <!-- ============ เหตุการณ์ล่าสุด + ปุ่มเร่งเวลา ============ -->
+  <div id="zoomCtrl">
+    <button data-action="zoom" data-z="in" title="ซูมเข้า">+</button>
+    <button data-action="zoom" data-z="fit" title="ดูทั้งโรงงาน">⤢</button>
+    <button data-action="zoom" data-z="out" title="ซูมออก">−</button>
+  </div>
+  <div id="timeCtrl">
+    <button id="btnTime" data-action="playPause" title="เริ่ม / หยุด / เดินต่อ (Space)"><span class="tr" id="btnPlayIcon">🚩</span><span class="tl" id="btnPlayLabel">เริ่มหีบ</span><small id="btnDayTxt">1 วันหีบ = 12 วิ</small></button>
+    <div class="sb-row">
+      <button data-action="speed" data-v="0.25" title="0.25x">0.25x</button><button data-action="speed" data-v="0.5" title="0.5x">0.5x</button><button data-action="speed" data-v="1" class="active" title="1x">1x</button><button data-action="speed" data-v="1.5" title="1.5x">1.5x</button>
+    </div>
+    <div class="sb-row">
+      <button data-action="speed" data-v="2" title="2x">2x</button><button data-action="speed" data-v="3" title="3x">3x</button><button data-action="speed" data-v="4" title="4x">4x</button><button data-action="speed" data-v="5" title="เร็วสุด 5x">5x</button>
+    </div>
+  </div>
+
+  <!-- ============ เมนูล่าง ============ -->
+  <nav id="bottomNav">
+    <button data-action="tab" data-tab="overview"><span>📊</span>ภาพรวม</button>
+    <button data-action="tab" data-tab="production"><span>🏭</span>การผลิต</button>
+    <button data-action="tab" data-tab="kpi"><span>🎯</span>KPI</button>
+    <button data-action="tab" data-tab="orders"><span>📋</span>คำสั่งซื้อ<i class="nav-badge" id="orderBadge"></i></button>
+    <button data-action="tab" data-tab="finance"><span>💰</span>การเงิน</button>
+    <button data-action="tab" data-tab="upgrades"><span>⬆️</span>อัปเกรด</button>
+    <button data-action="tab" data-tab="advisor"><span>🧑‍💼</span>ที่ปรึกษา</button>
+    <button data-action="tab" data-tab="reports"><span>📈</span>รายงาน</button>
+  </nav>
+
+  <!-- ============ ลิ้นชักข้อมูล ============ -->
+  <section id="drawer" class="hidden">
+    <div class="drawer-head"><h2 id="drawerTitle"></h2><button class="close" data-action="closeDrawer">✕</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </section>
+
+  <div id="modal" class="hidden"><div class="modal-card" id="modalCard"></div></div>
+  <div id="toast"></div>
+  <div id="loading"><div class="ld-card"><div class="ld-spin"></div><div>กำลังประกอบโรงงานจากภาพ…</div><small id="ldTxt"></small></div></div>
+</div><!-- /stage -->
+<div id="splash" class="hidden"></div><!-- นอก #stage เพื่อคลุมเต็มหน้าต่าง (ไม่ติด transform ของเวที) -->
+</div>
+
+<script src="js/depts.js"></script>
+<script src="js/data.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/main.js"></script>
+<script src="js/ui-dept.js"></script>
+</body>
+</html>
