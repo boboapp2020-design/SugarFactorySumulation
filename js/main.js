@@ -30,7 +30,7 @@ const Stage = {
 };
 function toggleFullscreen() {
   const d = document;
-  if (!d.fullscreenElement) (d.documentElement.requestFullscreen && d.documentElement.requestFullscreen().catch(() => toast('เบราว์เซอร์ไม่อนุญาตเต็มจอ ลองกด F11')));
+  if (!d.fullscreenElement) (d.documentElement.requestFullscreen && d.documentElement.requestFullscreen().catch(() => toast(TR('เบราว์เซอร์ไม่อนุญาตเต็มจอ ลองกด F11'))));
   else if (d.exitFullscreen) d.exitFullscreen();
 }
 
@@ -362,24 +362,24 @@ function startGame(fresh) {
   setSpeed(0);
   if (!lsGet('sfm_tut_done_v7')) showTutorial();
   else if (!state.started) showPrepBrief();
-  toast(`ยินดีต้อนรับ ผู้จัดการ${name}`);
+  toast(`${TR('ยินดีต้อนรับ ผู้จัดการ')} ${name}`);
 }
 
 /* หน้าบรีฟก่อนเริ่มหีบ */
 function showPrepBrief() {
   const chain = capChain(state).slice(0, 4);
-  showModal(`<h2>🗓️ ก่อนเปิดหีบ</h2>
-    <p class="tip">วันหีบยังไม่เดิน คุณมีเวลาเตรียมตัวเต็มที่ — ลงทุนแผนกที่ต้องการ ตั้งค่ากระบวนการ แล้วค่อยกด <b>เริ่มหีบ</b></p>
-    <div class="card"><h3>กำลังของสายวัตถุดิบตอนนี้</h3>
+  showModal(`<h2>🗓️ ${TR('ก่อนเปิดหีบ')}</h2>
+    <p class="tip">${TR('วันหีบยังไม่เดิน คุณมีเวลาเตรียมตัวเต็มที่ — ลงทุนแผนกที่ต้องการ ตั้งค่ากระบวนการ แล้วค่อยกด')} <b>${TR('เริ่มหีบ')}</b></p>
+    <div class="card"><h3>${TR('กำลังของสายวัตถุดิบตอนนี้')}</h3>
       ${chain.map(c => `<div class="kv"><span class="k">${TR(c.name)}</span><span class="v">${fmt(Math.round(c.tpd))} ${TR('ตัน/วัน')}</span></div>`).join('')}
-      <div class="tip">ทั้งสี่ควรใกล้เคียงกัน — ตอนนี้ทุกแผนกอยู่ที่ 0 ดาว (1,000 ตัน/วัน) ซึ่งน้อยมาก</div></div>
-    <div class="card"><h3>เงินและกำหนดจ่าย</h3>
-      <div class="kv"><span class="k">เงินสดตั้งต้น</span><span class="v">฿${fmtM(state.cash)}</span></div>
-      <div class="kv"><span class="k">ค่าอ้อย</span><span class="v">ทุก ${CONFIG.canePayEvery} วัน</span></div>
-      <div class="kv"><span class="k">ค่าจ้างพนักงาน</span><span class="v">ทุก ${CONFIG.wagePayEvery} วัน</span></div>
-      <div class="tip">เงินสดติดลบไม่ได้ — ขาดเมื่อไรจะกู้อัตโนมัติ ดอกเบี้ยเพิ่มตามยอดหนี้</div></div>
-    <div class="row"><button class="btn primary" data-action="closeModal">เริ่มปรับปรุงโรงงาน</button>
-      <button class="btn" data-action="tab" data-tab="upgrades">⬆️ ไปหน้าอัปเกรดแผนก</button></div>`);
+      <div class="tip">${TR('ทั้งสี่ควรใกล้เคียงกัน — ตอนนี้ทุกแผนกอยู่ที่ 0 ดาว (1,000 ตัน/วัน) ซึ่งน้อยมาก')}</div></div>
+    <div class="card"><h3>${TR('เงินและกำหนดจ่าย')}</h3>
+      <div class="kv"><span class="k">${TR('เงินสดตั้งต้น')}</span><span class="v">฿${fmtM(state.cash)}</span></div>
+      <div class="kv"><span class="k">${TR('ค่าอ้อย')}</span><span class="v">${TR('ทุก')} ${CONFIG.canePayEvery} ${TR('วัน')}</span></div>
+      <div class="kv"><span class="k">${TR('ค่าจ้างพนักงาน')}</span><span class="v">${TR('ทุก')} ${CONFIG.wagePayEvery} ${TR('วัน')}</span></div>
+      <div class="tip">${TR('เงินสดติดลบไม่ได้ — ขาดเมื่อไรจะกู้อัตโนมัติ ดอกเบี้ยเพิ่มตามยอดหนี้')}</div></div>
+    <div class="row"><button class="btn primary" data-action="closeModal">${TR('เริ่มปรับปรุงโรงงาน')}</button>
+      <button class="btn" data-action="tab" data-tab="upgrades">⬆️ ${TR('ไปหน้าอัปเกรดแผนก')}</button></div>`);
 }
 
 /* ============================ game loop ============================ */
@@ -436,7 +436,7 @@ function onClick(e) {
     case 'zoom': { const { W, H } = Cam.view(); if (d.z === 'fit') Cam.fit('cover'); else Cam.zoomAt(d.z === 'in' ? 1.25 : 0.8, W / 2, H / 2); break; }
     case 'fullscreen': toggleFullscreen(); break;
     case 'goHome': { setSpeed(0); saveGame(); UI.hadSave = true; closeDrawer(); closeModal(); showSplash('home'); break; }
-    case 'toggle3d': { const on = Three3D.setMode(!Three3D.on); update3dBtn(); if (on) { Three3D.projectAll(); toast('🧊 มุมมอง 3D'); } else toast('🗺️ มุมมอง 2D'); renderMarkers(); break; }
+    case 'toggle3d': { const on = Three3D.setMode(!Three3D.on); update3dBtn(); if (on) { Three3D.projectAll(); toast(TR('🧊 มุมมอง 3D')); } else toast(TR('🗺️ มุมมอง 2D')); renderMarkers(); break; }
     case 'splashNew': {
       const doNew = () => { if (UI.hadSave) { UI.hadSave = false; showSplash(); return; } startGame(true); };
       if (UI.hadSave && !state.ended) showConfirm('เริ่มฤดูใหม่? เกมที่ค้างอยู่จะถูกล้าง', doNew, { title: '🆕 เริ่มฤดูใหม่' });
@@ -458,15 +458,15 @@ function onClick(e) {
       state.started = true;
       logMsg(state, `🚩 เปิดหีบฤดูกาล — ${CONFIG.crushDays} วันหีบ + ${CONFIG.cleanBudget} วันล้างเครื่อง`, 'good');
       setSpeed(1); AudioSys.day(); closeModal(); render();
-      toast('เปิดหีบแล้ว! เวลาเริ่มเดิน');
+      toast(TR('เปิดหีบแล้ว! เวลาเริ่มเดิน'));
       break;
     }
     case 'cleanDay': {
-      if (state.cleanDay.active) { toast('กำลังหยุดล้างเครื่องอยู่'); break; }
+      if (state.cleanDay.active) { toast(TR('กำลังหยุดล้างเครื่องอยู่')); break; }
       const left = CONFIG.cleanBudget - state.cleanDaysUsed;
       const msg = left > 0
-        ? `หยุดล้างเครื่อง 1 วัน? (เหลือโควตา ${left} วัน) ค่าใช้จ่าย ฿${fmtM(CONFIG.cleanDayCost)}`
-        : `ใช้โควตาวันล้างเครื่องหมดแล้ว — หยุดเพิ่มจะกินวันหีบ ยืนยันหรือไม่?`;
+        ? `${TR('หยุดล้างเครื่อง 1 วัน?')} (${TR('เหลือโควตา')} ${left} ${TR('วัน')}) ${TR('ค่าใช้จ่าย')} ฿${fmtM(CONFIG.cleanDayCost)}`
+        : TR('ใช้โควตาวันล้างเครื่องหมดแล้ว — หยุดเพิ่มจะกินวันหีบ ยืนยันหรือไม่?');
       showConfirm(msg, () => { startCleanDay(state); renderStatic(); }, { title: '🧽 หยุดล้างเครื่อง 1 วัน' });
       break;
     }
@@ -506,7 +506,7 @@ function onClick(e) {
       if (after > before) {
         AudioSys.star(); renderMarkers();
         const D = dept(d.id), ch = deptDiffText(d.id, before).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        toast(`⭐ ${D.name} → ${after} ดาว · ${ch || D.levels[after].name}`);
+        toast(`⭐ ${TR(D.name)} → ${after} ${TR('ดาว')} · ${ch || TR(D.levels[after].name)}`);
         const bld = SCENE.buildings.find(b => (b.dept || b.key) === d.id);
         if (bld) floatAt(bld.key, '⭐'.repeat(Math.min(3, after)));
       }
@@ -520,7 +520,7 @@ function onClick(e) {
     case 'newGame': showConfirm('เริ่มฤดูใหม่? ข้อมูลเดิมจะหายไป', () => { lsDel(SAVE_KEY); const nm = state.player; state = createInitialState(); state.player = nm; computeKPI(state); FX.clear(); closeModal(); closeDrawer(); setSpeed(0); UI.hadSave = false; render(); showSplash(); }, { title: '🆕 เริ่มฤดูใหม่' }); break;
     case 'confirmYes': { const cb = UI._confirmYes; UI._confirmYes = null; closeModal(); if (cb) cb(); break; }
     case 'confirmNo': { UI._confirmYes = null; closeModal(); break; }
-    case 'save': saveGame(); toast('บันทึกแล้ว'); break;
+    case 'save': saveGame(); toast(TR('บันทึกแล้ว')); break;
     case 'export': exportSave(); break;
   }
 }
@@ -572,7 +572,7 @@ function applyPreset(p) {
   if (p === 'yield') { c.imbibition = 300; c.pH = 7.1; c.syrupBrix = Math.min(66, P.syrupBxMax); c.wash = 3.4; c.crushTarget = Math.round(P.millTph * 0.85); }
   if (p === 'balanced') { c.imbibition = 270; c.pH = 7.1; c.syrupBrix = Math.min(65, P.syrupBxMax); c.wash = 3.0; c.crushTarget = Math.round(P.millTph * 0.92); }
   if (p === 'throughput') { c.imbibition = 245; c.pH = 7.0; c.syrupBrix = Math.min(63, P.syrupBxMax); c.wash = 2.6; c.crushTarget = Math.round(P.millTph); }
-  toast('ตั้งค่าชุด "' + ({ yield: 'เน้นคุณภาพ', balanced: 'สมดุล', throughput: 'เน้นปริมาณ' })[p] + '" แล้ว');
+  toast(TR('ตั้งค่าชุด') + ' "' + TR(({ yield: 'เน้นคุณภาพ', balanced: 'สมดุล', throughput: 'เน้นปริมาณ' })[p]) + '" ' + (LANG === 'en' ? '' : 'แล้ว'));
 }
 
 function onKey(e) {
@@ -602,13 +602,13 @@ function setSpeed(v) {
 function playPause() {
   /* มีเหตุการณ์รอตัดสินใจ → เวลาต้องหยุดจนกว่าจะเลือก */
   if ((state.emergency || state.decisions.some(d => d.shown)) && !document.getElementById('modal').classList.contains('hidden')) {
-    toast('ตัดสินใจเหตุการณ์ก่อน แล้วเวลาจะเดินต่อ'); return;
+    toast(TR('ตัดสินใจเหตุการณ์ก่อน แล้วเวลาจะเดินต่อ')); return;
   }
   if (!state.ended && !state.started) {
     state.started = true;
     logMsg(state, `🚩 เปิดหีบฤดูกาล — ${CONFIG.crushDays} วันหีบ + ${CONFIG.cleanBudget} วันล้างเครื่อง`, 'good');
     setSpeed(1); AudioSys.day(); closeModal(); render();
-    toast('เปิดหีบแล้ว! เวลาเริ่มเดิน');
+    toast(TR('เปิดหีบแล้ว! เวลาเริ่มเดิน'));
   } else if (state.speed > 0) setSpeed(0);
   else setSpeed(UI.lastSpeed || 1);
 }
@@ -797,91 +797,91 @@ function markerInfo(b) {
   }
   switch (b.key) {
     case 'promo':
-      sub = `หาอ้อย ${fmt(Math.round(dCap(s, 'promo')))} ต/ว · เชื่อมั่น ${Math.round(s.growerTrust)}%`;
+      sub = `${TR('หาอ้อย')} ${fmt(Math.round(dCap(s, 'promo')))} ${TR('ต/ว')} · ${TR('เชื่อมั่น')} ${Math.round(s.growerTrust)}%`;
       vcls = s.growerTrust < 45 ? 'bad' : s.growerTrust < 65 ? 'warn' : '';
-      tip = `อ้อยรอตัดในไร่ ${fmt(Math.round(s.field.standing))} ตัน · เสียให้โรงอื่นแล้ว ${fmt(Math.round(s.totals.caneLost))} ตัน`; break;
+      tip = `${TR('อ้อยรอตัดในไร่')} ${fmt(Math.round(s.field.standing))} ${TR('ตัน')} · ${TR('เสียให้โรงอื่นแล้ว')} ${fmt(Math.round(s.totals.caneLost))} ${TR('ตัน')}`; break;
     case 'harvest':
-      sub = `ตัด+ขน ${fmt(Math.round(dCap(s, 'harvest')))} ต/ว · trash ${dv(s, 'harvest', 'trash').toFixed(1)}%`;
-      tip = `ตัด-ถึง-หีบพื้นฐาน ${dv(s, 'harvest', 'cut')} ชม.`; break;
+      sub = `${TR('ตัด+ขน')} ${fmt(Math.round(dCap(s, 'harvest')))} ${TR('ต/ว')} · trash ${dv(s, 'harvest', 'trash').toFixed(1)}%`;
+      tip = `${TR('ตัด-ถึง-หีบพื้นฐาน')} ${dv(s, 'harvest', 'cut')} ${TR('ชม.')}`; break;
     case 'yard': {
       const yt = yardTons(s), pc = yt / P.yardCap, age = oldestAgeH(s);
-      sub = `อ้อย ${fmt(Math.round(yt))} ตัน · คิว ${s.yard.queueH.toFixed(0)} ชม.`;
+      sub = `${TR('อ้อย')} ${fmt(Math.round(yt))} ${TR('ตัน')} · ${TR('คิว')} ${s.yard.queueH.toFixed(0)} ${TR('ชม.')}`;
       vcls = (age > 24 || s.yard.queueH > 18) ? 'bad' : (pc > 0.8 || s.yard.queueH > 10) ? 'warn' : '';
       dot = vcls === 'bad' ? 'down' : vcls === 'warn' ? 'idle' : '';
       alert = age > CONFIG.dextranAfterH;
-      tip = `ลาน ${fmt(Math.round(yt))}/${fmt(P.yardCap)} ตัน · CCS ${yardCCS(s).toFixed(1)} · เก่าสุด ${age.toFixed(0)} ชม. · รถหนีคิวแล้ว ${fmt(Math.round(s.totals.caneDiverted))} ตัน`; break;
+      tip = `${TR('ลาน')} ${fmt(Math.round(yt))}/${fmt(P.yardCap)} ${TR('ตัน')} · CCS ${yardCCS(s).toFixed(1)} · ${TR('เก่าสุด')} ${age.toFixed(0)} ${TR('ชม.')} · ${TR('รถหนีคิวแล้ว')} ${fmt(Math.round(s.totals.caneDiverted))} ${TR('ตัน')}`; break;
     }
     case 'mill':
-      sub = `${fmt(K.tch || 0, 0)} ต/ชม. · Ext ${(K.extraction || 0).toFixed(1)}%`;
+      sub = `${fmt(K.tch || 0, 0)} ${TR('ต/ชม.')} · Ext ${(K.extraction || 0).toFixed(1)}%`;
       tip = `PI ${(K.pi || 0).toFixed(0)} · Pol%Bagasse ${(K.polBagPct || 0).toFixed(2)}%`; break;
     case 'clar':
       sub = `pH ${s.ctrl.pH.toFixed(1)} · Pol FC ${(K.lossFC || 0).toFixed(2)}%`; break;
     case 'evap': {
       const sc = Math.round((s.dept.evap.scale || 0) * 100);
-      sub = `Bx ${s.ctrl.syrupBrix} · ตะกรัน ${sc}%`;
+      sub = `Bx ${s.ctrl.syrupBrix} · ${TR('ตะกรัน')} ${sc}%`;
       if (sc > 40) vcls = 'bad'; else if (sc > 25) vcls = 'warn';
-      tip = `ระเหยน้ำวันนี้ ${fmt(Math.round(t.waterEvap))} ตัน`; break;
+      tip = `${TR('ระเหยน้ำวันนี้')} ${fmt(Math.round(t.waterEvap))} ${TR('ตัน')}`; break;
     }
     case 'pan':
-      sub = `FM Pty ${(K.ptyFM || 0).toFixed(1)}${t.panLimited ? ' ⚠ คอขวด' : ''}`;
+      sub = `FM Pty ${(K.ptyFM || 0).toFixed(1)}${t.panLimited ? ' ⚠ ' + TR('คอขวด') : ''}`;
       vcls = K.ptyFM > 36 ? 'bad' : K.ptyFM > 34 ? 'warn' : '';
       if (t.panLimited && !dot) dot = 'idle';
       tip = `BHR ${(K.bhr || 0).toFixed(1)}%`; break;
     case 'fugal':
-      sub = `น้ำตาล ${fmt(Math.round(t.sugar))} ต/ว${t.fugalLimited ? ' ⚠ คอขวด' : ''}`;
+      sub = `${TR('น้ำตาล')} ${fmt(Math.round(t.sugar))} ${TR('ต/ว')}${t.fugalLimited ? ' ⚠ ' + TR('คอขวด') : ''}`;
       if (t.fugalLimited && !dot) dot = 'idle';
       tip = `Overall Recovery ${(K.recovery || 0).toFixed(1)}%`; break;
     case 'pack': {
       const pr = s.rawSugar / RAW_SUGAR_BIN;
-      sub = `บรรจุ ${fmt(Math.round(t.packed))} ต · รอ ${fmt(Math.round(s.rawSugar))}`;
+      sub = `${TR('บรรจุ')} ${fmt(Math.round(t.packed))} ${TR('ต')} · ${TR('รอ')} ${fmt(Math.round(s.rawSugar))}`;
       if (t.packFull) { vcls = 'bad'; dot = 'down'; alert = true; }
       else if (pr > 0.6) { vcls = 'warn'; if (!dot) dot = 'idle'; }
-      tip = `กำลังบรรจุ ${fmt(Math.round(dCap(s, 'pack')))} ตันน้ำตาล/วัน · หกหาย ${dv(s, 'pack', 'loss')}%`; break;
+      tip = `${TR('กำลังบรรจุ')} ${fmt(Math.round(dCap(s, 'pack')))} ${TR('ตันน้ำตาล/วัน')} · ${TR('หกหาย')} ${dv(s, 'pack', 'loss')}%`; break;
     }
     case 'warehouse': {
       const pc = s.stock.sugar / P.whCap;
       const acc = s.orders.filter(o => o.status === 'accepted').length;
-      sub = `คลัง ${fmt(Math.round(s.stock.sugar))} ต (${Math.round(pc * 100)}%)${acc ? ' · รอส่ง ' + acc : ''}`;
+      sub = `${TR('คลัง')} ${fmt(Math.round(s.stock.sugar))} ${TR('ต')} (${Math.round(pc * 100)}%)${acc ? ' · ' + TR('รอส่ง') + ' ' + acc : ''}`;
       vcls = pc > 0.9 ? 'bad' : pc > 0.7 ? 'warn' : '';
       dot = pc > 0.9 ? 'down' : pc > 0.7 ? 'idle' : '';
       alert = pc > 0.92;
-      tip = `โควตาโหลดรถวันนี้เหลือ ${fmt(Math.round(Math.max(0, P.shipTpd - (s.todayShipped || 0))))} ตัน`; break;
+      tip = `${TR('โควตาโหลดรถวันนี้เหลือ')} ${fmt(Math.round(Math.max(0, P.shipTpd - (s.todayShipped || 0))))} ${TR('ตัน')}`; break;
     }
     case 'boiler':
-      sub = t.steamShort ? 'ไอน้ำไม่พอ!' : `ไอ ${fmt(t.steamMade / hrs, 0)} ต/ชม. · ชานอ้อย ${fmt(Math.round(s.stock.bagasse))}`;
+      sub = t.steamShort ? TR('ไอน้ำไม่พอ!') : `${TR('ไอ')} ${fmt(t.steamMade / hrs, 0)} ${TR('ต/ชม.')} · ${TR('ชานอ้อย')} ${fmt(Math.round(s.stock.bagasse))}`;
       if (t.steamShort) { dot = 'down'; alert = true; vcls = 'bad'; }
-      tip = `Steam on cane ${(K.steamOnCane || 0).toFixed(0)}% · ⚠ มีความเสี่ยงไฟไหม้`; break;
+      tip = `Steam on cane ${(K.steamOnCane || 0).toFixed(0)}% · ⚠ ${TR('มีความเสี่ยงไฟไหม้')}`; break;
     case 'power':
-      sub = `ขายไฟ ${(t.powerExport / hrs / 1000).toFixed(1)} MW · ${fmt(K.kwhPerTc || 0, 0)} kWh/tc`;
-      tip = `รายได้ไฟวันนี้ ฿${fmt(Math.round(t.powerRev))}`; break;
+      sub = `${TR('ขายไฟ')} ${(t.powerExport / hrs / 1000).toFixed(1)} MW · ${fmt(K.kwhPerTc || 0, 0)} kWh/tc`;
+      tip = `${TR('รายได้ไฟวันนี้')} ฿${fmt(Math.round(t.powerRev))}`; break;
     case 'molasses': {
       const mc = up(s, 'molTank', 'molCap'), pc = s.stock.molasses / mc;
-      sub = `${fmt(Math.round(s.stock.molasses))}/${fmt(mc)} ต · ฿${fmt(s.market.molPrice)}`;
+      sub = `${fmt(Math.round(s.stock.molasses))}/${fmt(mc)} ${TR('ต')} · ฿${fmt(s.market.molPrice)}`;
       vcls = pc > 0.95 ? 'bad' : pc > 0.75 ? 'warn' : '';
-      alert = !!t.molFull; tip = 'คลิกเพื่อขายกากน้ำตาล'; break;
+      alert = !!t.molFull; tip = TR('คลิกเพื่อขายกากน้ำตาล'); break;
     }
     case 'maint': {
       const worst = Math.min.apply(null, MACHINE_IDS.map(k => s.dept[k].power));
-      sub = `พลังต่ำสุด ${Math.round(worst)}% · ล้าง ${s.cleanDaysUsed}/${CONFIG.cleanBudget}`;
+      sub = `${TR('พลังต่ำสุด')} ${Math.round(worst)}% · ${TR('ล้าง')} ${s.cleanDaysUsed}/${CONFIG.cleanBudget}`;
       vcls = worst < 25 ? 'bad' : worst < 50 ? 'warn' : ''; alert = worst < 20; break;
     }
     case 'office': {
       const open = s.orders.filter(o => o.status === 'open').length;
-      sub = `ออร์เดอร์ใหม่ ${open} · ลูกค้า ${Math.round(s.custSat)}%`;
+      sub = `${TR('ออร์เดอร์ใหม่')} ${open} · ${TR('ลูกค้า')} ${Math.round(s.custSat)}%`;
       vcls = s.custSat < 55 ? 'bad' : open ? 'warn' : ''; break;
     }
     case 'ert':
-      sub = `เหตุ ${s.emergencies.length} ครั้ง`;
+      sub = `${TR('เหตุ')} ${s.emergencies.length} ${TR('ครั้ง')}`;
       vcls = dStar(s, 'ert') === 0 ? 'warn' : ''; break;
     case 'hr':
-      sub = `ขวัญ ${Math.round(s.staffSat)}%`;
+      sub = `${TR('ขวัญ')} ${Math.round(s.staffSat)}%`;
       vcls = s.staffSat < 50 ? 'bad' : s.staffSat < 70 ? 'warn' : ''; break;
     case 'qc':
-      sub = s.qualityIssue > 0.8 ? 'พบปัญหา' : 'ปกติ';
+      sub = s.qualityIssue > 0.8 ? TR('พบปัญหา') : TR('ปกติ');
       vcls = s.qualityIssue > 0.8 ? 'bad' : ''; break;
     case 'water': {
       const pc = s.water.level / s.water.cap, bod = up(s, 'wwt', 'bod');
-      sub = `บ่อ ${Math.round(pc * 100)}% · BOD ${bod}`;
+      sub = `${TR('บ่อ')} ${Math.round(pc * 100)}% · BOD ${bod}`;
       vcls = (pc > 0.85 || bod > CONFIG.bodStandard) ? 'bad' : pc > 0.7 ? 'warn' : '';
       alert = pc > 0.9; break;
     }
@@ -928,7 +928,7 @@ function floatAt(key, text, neg = false) {
 }
 function dayFlash(day) {
   const el = document.getElementById('dayFlash');
-  el.textContent = 'วันที่ ' + day;
+  el.textContent = TR('วันที่') + ' ' + day;
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
 }
 
@@ -1424,11 +1424,11 @@ function showConfirm(msg, onYes, opts) {
   opts = opts || {};
   UI._confirmYes = onYes || null;
   showModal(`<div class="confirm-box">
-    <h2>${opts.title || '⚠️ ยืนยัน'}</h2>
-    <p class="confirm-msg">${msg}</p>
+    <h2>${TR(opts.title || '⚠️ ยืนยัน')}</h2>
+    <p class="confirm-msg">${TR(msg)}</p>
     <div class="confirm-actions">
-      <button class="btn primary" data-action="confirmYes">${opts.yes || 'ตกลง'}</button>
-      <button class="btn" data-action="confirmNo">${opts.no || 'ยกเลิก'}</button>
+      <button class="btn primary" data-action="confirmYes">${TR(opts.yes || 'ตกลง')}</button>
+      <button class="btn" data-action="confirmNo">${TR(opts.no || 'ยกเลิก')}</button>
     </div></div>`);
 }
 
