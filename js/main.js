@@ -447,7 +447,6 @@ function onClick(e) {
       showSplash(d.v);   // home / manual / depts / scoring / sound — เปิดเนื้อหาจริง
       break;
     }
-    case 'lbSaveUrl': { const inp = document.getElementById('lbUrl'); if (inp) { Leaderboard.setUrl(inp.value); toast(inp.value.trim() ? '🌐 เชื่อม Google Sheet แล้ว' : 'ล้างการเชื่อมต่อ — ใช้กระดานในเครื่อง'); showSplash('ranking'); } break; }
     case 'spMusic': AudioSys.toggle(); updateMusicBtn(); showSplash('sound'); break;
     case 'spVol': AudioSys.setVolume(+d.v); showSplash('sound'); break;
     case 'spUi': setUiSize(d.v); showSplash('sound'); break;
