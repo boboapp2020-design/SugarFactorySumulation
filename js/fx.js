@@ -276,11 +276,11 @@ const FX = {
     const defs = el('defs', {});
     const lg = (id, stops, x2 = 1, y2 = 0) => { const g = el('linearGradient', { id, x1: 0, y1: 0, x2, y2 }, defs); stops.forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, g)); };
     const rg = (id, stops, cx = '.36', cy = '.3') => { const g = el('radialGradient', { id, cx, cy }, defs); stops.forEach(([o, c, op]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': op === undefined ? 1 : op }, g)); };
-    lg('wSteel', [[0, '#fdfefe'], [.28, '#dee6ec'], [.68, '#a6b2bb'], [1, '#7c888f']]);
-    lg('wWarm', [[0, '#fff8e8'], [.3, '#eedcb6'], [.72, '#bd9f6d'], [1, '#8e7448']]);
-    lg('wDark', [[0, '#94a0aa'], [.4, '#74818b'], [1, '#4d5860']]);
-    lg('wBrick', [[0, '#f6e3cd'], [.4, '#e0bf9c'], [1, '#a9835d']]);
-    rg('tTop', [[0, '#ffffff'], [.5, '#e6edf2'], [1, '#a9b4bc']]);
+    lg('wSteel', [[0, '#ffffff'], [.2, '#e2eaf0'], [.58, '#9caab4'], [1, '#5f6b74']], 1, .32);
+    lg('wWarm', [[0, '#fffaf0'], [.22, '#f0e0bf'], [.64, '#b69764'], [1, '#78603a']], 1, .32);
+    lg('wDark', [[0, '#7c8894'], [.35, '#5c6874'], [1, '#333d45']], 1, .5);
+    lg('wBrick', [[0, '#fbecda'], [.36, '#e3c39f'], [1, '#976f4a']], 1, .32);
+    rg('tTop', [[0, '#ffffff'], [.42, '#e9f0f5'], [1, '#8f9ba4']]);
     rg('tTopWarm', [[0, '#fffaf0'], [.5, '#f2dfbd'], [1, '#b89a6c']]);
     rg('gLamp', [[0, '#ffe9ae', 1], [.45, '#ffd677', .45], [1, '#ffc94d', 0]], '.5', '.5');
     rg('gBag', [[0, '#ffffff'], [.6, '#f4efe2'], [1, '#d8cdb4']]);
@@ -291,7 +291,7 @@ const FX = {
       rust: ['#e7b27c', '#b47f4d', '#8d5f37'], green: ['#a8d277', '#74a648', '#578034'],
       red: ['#e99586', '#b86355', '#8f483d'], brick: ['#e8b48c', '#bb7f57', '#8f5c3b'],
     };
-    const SX = 13, SY = 9;
+    const SX = 17, SY = 12;
     const box = (x, yb, w, d, H, roof = 'steel', opt = {}) => {
       const [rl, rm, rd] = ROOFS[roof] || ROOFS.steel;
       const g = el('g', { filter: 'url(#fShadow)' });
@@ -299,6 +299,10 @@ const FX = {
       el('path', { d: `M${x + w} ${top} l${SX} ${-SY} v${H} l${-SX} ${SY} z`, fill: 'url(#wDark)', opacity: .95 }, g);
       el('rect', { x, y: top, width: w, height: H, fill: opt.wall || 'url(#wSteel)', stroke: '#69747c', 'stroke-width': 2 }, g);
       for (let i = 1; i * 13 < w; i++) el('line', { x1: x + i * 13, y1: top + 2, x2: x + i * 13, y2: yb - 2, stroke: '#8d98a1', 'stroke-width': 1, opacity: .35 }, g);
+      /* ไฮไลต์ขอบรับแสง (บน+ซ้าย) + เงาสัมผัสพื้น (ล่าง) ให้ดูมีปริมาตร */
+      el('rect', { x: x + 1, y: top + 1, width: w - 2, height: 2.5, fill: '#ffffff', opacity: .4 }, g);
+      el('rect', { x: x + 1, y: top + 1, width: 2.5, height: H - 2, fill: '#ffffff', opacity: .22 }, g);
+      el('rect', { x, y: yb - H * 0.16, width: w, height: H * 0.16, fill: '#232e38', opacity: .16 }, g);
       el('rect', { x, y: yb - H * 0.22, width: w, height: H * 0.1, fill: rm, opacity: .55 }, g);
       el('path', { d: `M${x} ${top} l${SX} ${-SY} h${w} l${-SX} ${SY} z`, fill: rl, opacity: .95 }, g);
       el('rect', { x, y: top - d, width: w, height: d, rx: 3, fill: rm, stroke: rd, 'stroke-width': 2 }, g);
@@ -761,7 +765,7 @@ const FX = {
       hat = hat || '#ffd34d';
       const g = el('g', {});
       const body = el('g', { transform: 'scale(1.6)' }, g);            // คนตัวใหญ่ขึ้นให้เห็นชัด
-      el('ellipse', { cx: 0, cy: 8, rx: 4.8, ry: 2, fill: '#0d2030', opacity: .28 }, body);
+      el('ellipse', { cx: 3, cy: 8.4, rx: 6.2, ry: 2.2, fill: '#0d2030', opacity: .3 }, body);   // เงาตกกระทบมีทิศ
       /* ขา + รองเท้าบูท */
       el('rect', { x: -2.6, y: 2, width: 5.2, height: 6, rx: 1.6, fill: '#37506f' }, body);
       el('rect', { x: -2.7, y: 6.6, width: 2.4, height: 2.6, rx: .7, fill: '#1c2836' }, body);
