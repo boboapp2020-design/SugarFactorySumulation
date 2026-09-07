@@ -1101,7 +1101,7 @@ function computeScore(s) {
     clamp((K.recovery - 74) / 14 * 100, 0, 100) * 0.45 +
     clamp((K.extraction - 92) / 6 * 100, 0, 100) * 0.30 +
     clamp((K.bhr - 78) / 14 * 100, 0, 100) * 0.15 +
-    clamp((3.5 - (K.undet || 3.5)) / 3.0 * 100, 0, 100) * 0.10, 0, 100);
+    clamp((3.5 - (K.undet ?? 3.5)) / 3.0 * 100, 0, 100) * 0.10, 0, 100);
 
   s.score = {
     mgmt,
