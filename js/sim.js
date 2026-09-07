@@ -1093,15 +1093,19 @@ function computeScore(s) {
   const caneKeep = T.cane / caneIn;
   const bn = bottleneckSpread(s);
   const output = clamp(T.cane / CONFIG.caneTarget * 100, 0, 100);   // ปริมาณอ้อยเข้าหีบเทียบเป้า 700,000 ตัน
+  // --- ประสิทธิภาพการบริหาร: ผ่อนโทษคอขวด (ให้เต็มถ้า bn ≤ 0.06 แล้วค่อยๆ ลด) ---
   const mgmt = clamp(
     (K.timeEff || 0) * 0.34 + output * 0.22 + caneKeep * 100 * 0.20
-    + (100 - bn * 100) * 0.14 + clamp(100 - s.loan / 2_000_000, 0, 100) * 0.10, 0, 100);
+    + clamp(100 - Math.max(0, bn - 0.06) * 160, 0, 100) * 0.14
+    + clamp(100 - s.loan / 2_000_000, 0, 100) * 0.10, 0, 100);
 
+  // --- คุณภาพการผลิต: แก้บั๊ก undet (0 ต้องได้เต็ม ไม่ใช่ตกไป fallback 3.5) + ผ่อนเพดานให้เอื้อมถึง ---
+  const undetV = (typeof K.undet === 'number') ? K.undet : 3.5;
   const production = clamp(
-    clamp((K.recovery - 74) / 14 * 100, 0, 100) * 0.45 +
-    clamp((K.extraction - 92) / 6 * 100, 0, 100) * 0.30 +
-    clamp((K.bhr - 78) / 14 * 100, 0, 100) * 0.15 +
-    clamp((3.5 - (K.undet ?? 3.5)) / 3.0 * 100, 0, 100) * 0.10, 0, 100);
+    clamp((K.recovery   - 74) / 13 * 100, 0, 100) * 0.45 +   // เต็มที่ recovery ≥ 87
+    clamp((K.extraction - 92) /  5 * 100, 0, 100) * 0.30 +   // เต็มที่ extraction ≥ 97
+    clamp((K.bhr        - 78) / 13 * 100, 0, 100) * 0.15 +   // เต็มที่ bhr ≥ 91
+    clamp((4.0 - undetV) / 3.2 * 100, 0, 100) * 0.10, 0, 100); // เต็มที่ undet ≤ 0.8
 
   s.score = {
     mgmt,
@@ -1110,7 +1114,7 @@ function computeScore(s) {
     custSat: s.custSat,
     staffSat: s.staffSat,
     growerSat: s.growerTrust,
-    complaints: clamp(100 - complaintsTotal * 7, 0, 100),
+    complaints: clamp(100 - complaintsTotal * 5, 0, 100),   // เดิม *7 → *5 : ร้องเรียน 1-2 ครั้งไม่ทำให้ S หลุด
     _profitValue: profit,
     _complaintsTotal: complaintsTotal,
     _caneCrushed: T.cane,
@@ -1123,10 +1127,11 @@ function computeScore(s) {
   return s.score;
 }
 
-/* เกรด 8 ระดับ (สเกลเต็ม 1000): S=1000 · A+ 960-999 · A 860-959 · B+ 810-859 · B 710-809 · C+ 660-709 · C 560-659 · F <560 */
+/* เกรด 8 ระดับ (เต็ม 1000) — S ทำได้จริงถ้าเล่นดีรอบด้าน ไม่ต้องเพอร์เฟกต์ 100 ทุกช่อง
+   S 945+ · A+ 890-944 · A 810-889 · B+ 750-809 · B 670-749 · C+ 610-669 · C 540-609 · F <540 */
 function gradeOf(t) {
-  return t >= 1000 ? 'S' : t >= 960 ? 'A+' : t >= 860 ? 'A' : t >= 810 ? 'B+'
-    : t >= 710 ? 'B' : t >= 660 ? 'C+' : t >= 560 ? 'C' : 'F';
+  return t >= 945 ? 'S' : t >= 890 ? 'A+' : t >= 810 ? 'A' : t >= 750 ? 'B+'
+    : t >= 670 ? 'B' : t >= 610 ? 'C+' : t >= 540 ? 'C' : 'F';
 }
 
 /* ความไม่สมดุลของคอขวด 0 (สมดุลดี) → 1 (ต่างกันมาก) */

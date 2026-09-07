@@ -490,6 +490,6 @@ function scoreCardHTML() {
     <div class="kv"><span class="k">คะแนนรวม (Ranking)</span><span class="v">${Math.round(sc.overall)}/1000</span></div>
     <div class="kv"><span class="k">กำไรสุทธิตอนนี้</span><span class="v ${sc._profitValue >= 0 ? 'good' : 'bad'}">฿${fmtM(sc._profitValue)} (เป้า ฿${fmtM(CONFIG.winProfit)})</span></div>
     <div class="kv"><span class="k">อ้อยเข้าหีบ</span><span class="v">${fmt(Math.round(sc._caneCrushed || 0))} / ${fmt(sc._caneTarget || CONFIG.caneTarget)} ตัน (${Math.round(sc._output || 0)}%)</span></div>
-    <div class="kv"><span class="k">เกรดตอนนี้</span><span class="v ${sc.overall >= 710 ? 'good' : sc.overall >= 560 ? 'warn' : 'bad'}">${sc.grade || '-'} · ${Math.round(sc.overall)} คะแนน</span></div>
+    <div class="kv"><span class="k">เกรดตอนนี้</span><span class="v ${sc.overall >= 670 ? 'good' : sc.overall >= 540 ? 'warn' : 'bad'}">${sc.grade || '-'} · ${Math.round(sc.overall)} คะแนน</span></div>
     <div class="kv"><span class="k">ข้อร้องเรียนรวม</span><span class="v ${sc._complaintsTotal ? 'bad' : 'good'}">ลูกค้า ${state.complaints.customer} · แรงงาน ${state.complaints.labour} · ภาครัฐ ${state.complaints.gov}</span></div></div>`;
 }
