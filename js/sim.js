@@ -164,7 +164,7 @@ function runSupply(s, h, P, space, millTpd) {
   /* --- ทีม 2: ตัดและขน → เข้าคิวหน้าโรงงาน ---
      "อย่าตัดล่วงหน้ามากกว่าคิวรถที่มีจริง" — คิวยาวแล้วทีมตัดจะชะลอ ไม่ตัดทิ้งไว้ให้เสื่อม */
   const qSoft = Math.max(600, P.yardCap * 0.5);
-  const cutSlow = clamp(1 - (s.yard.queueTons - qSoft) / qSoft, 0.30, 1);
+  const cutSlow = clamp(1 - (s.yard.queueTons - qSoft) / qSoft, 0.5, 1);   // floor 0.5: ตัดไม่หยุดกะทันหันเมื่อคิวยาว
   const cut = Math.min(s.field.standing, P.harvestTpd / 24 * h * cutSlow);
   s.field.standing -= cut;
   s.yard.queueTons += cut;
